@@ -1,5 +1,4 @@
 import { listDepartments, listEmployees, type EmployeeQuery } from '../../api/employees';
-import type { EmployeeStatus } from '../../api/types';
 import { useAsync } from '../../shared/useAsync';
 
 export const PAGE_SIZE = 10;
@@ -13,7 +12,7 @@ export function parseListQuery(params: URLSearchParams): EmployeeQuery {
     pageSize: PAGE_SIZE,
     search: params.get('search')?.trim() || undefined,
     department: params.get('department') || undefined,
-    status: status === 'Active' || status === 'Inactive' ? (status as EmployeeStatus) : undefined,
+    status: status === 'Active' || status === 'Inactive' ? status : undefined,
   };
 }
 

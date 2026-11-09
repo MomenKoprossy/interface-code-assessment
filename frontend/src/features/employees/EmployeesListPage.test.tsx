@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '../../api/employees';
 import { ApiError } from '../../api/problem';
 import type { EmployeeListItem, PagedResult } from '../../api/types';
-import { currentLocation, renderRoute, signInAs } from '../../test/render';
+import { currentLocation, renderRoute, signInAs, type RouteEntry } from '../../test/render';
 import { EmployeesListPage } from './EmployeesListPage';
 
 vi.mock('../../api/employees');
@@ -45,13 +45,15 @@ beforeEach(() => {
   vi.mocked(api.listEmployees).mockImplementation(async (query) => page(query.page, 25));
 });
 
-const renderList = (url = '/employees') => renderRoute(<EmployeesListPage />, { path: '/employees', url });
+const renderList = (url: RouteEntry = '/employees') =>
+  renderRoute(<EmployeesListPage />, { path: '/employees', url });
 
 describe('EmployeesListPage', () => {
   it('renders the first page with pagination controls', async () => {
     renderList();
 
     expect(await screen.findByText('Employee 1')).toBeInTheDocument();
+    await waitFor(() => expect(document.title).toBe('Employees · Employee Payroll'));
     expect(screen.getByText('25 employees')).toBeInTheDocument();
     expect(screen.getByText('Page 1 of 3')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '← Previous' })).toBeDisabled();
@@ -75,6 +77,29 @@ describe('EmployeesListPage', () => {
     expect(currentLocation()).toBe('/employees?page=2');
     expect(await screen.findByText('Employee 11')).toBeInTheDocument();
     expect(screen.getByText('Page 2 of 3')).toBeInTheDocument();
+  });
+
+  it('keeps keyboard focus on the pagination button while the next page loads', async () => {
+    const user = userEvent.setup();
+    renderList();
+    await screen.findByText('Employee 1');
+
+    await user.click(screen.getByRole('button', { name: 'Next →' }));
+
+    expect(screen.getByRole('button', { name: 'Next →' })).toHaveFocus();
+    expect(await screen.findByText('Employee 11')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next →' })).toHaveFocus();
+  });
+
+  it('shows the notice passed by the form page until the filters change', async () => {
+    const user = userEvent.setup();
+    renderList({ pathname: '/employees', state: { notice: 'Ada was added.' } });
+    expect(await screen.findByText('Ada was added.')).toBeInTheDocument();
+    await screen.findByText('Employee 1');
+
+    await user.selectOptions(screen.getByLabelText('Status'), 'Active');
+
+    expect(screen.queryByText('Ada was added.')).not.toBeInTheDocument();
   });
 
   it('restores filters and page from the URL', async () => {
@@ -156,5 +181,30 @@ describe('EmployeesListPage', () => {
     await user.click(screen.getByRole('button', { name: 'Delete employee' }));
 
     expect(await screen.findByText('Employee 3 was already deleted.')).toBeInTheDocument();
+  });
+
+  it('keeps the dialog open with the error when the delete fails', async () => {
+    vi.mocked(api.deleteEmployee).mockRejectedValue(new ApiError({ status: 500, title: 'Server error' }));
+    const user = userEvent.setup();
+    renderList();
+
+    await user.click(await screen.findByRole('button', { name: 'Delete Employee 3' }));
+    await user.click(screen.getByRole('button', { name: 'Delete employee' }));
+
+    const dialog = screen.getByRole('alertdialog', { name: 'Delete employee?' });
+    expect(await within(dialog).findByText('Server error')).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Delete employee' })).toBeEnabled();
+  });
+
+  it('moves focus to the notice after a delete, since the deleted row disappears', async () => {
+    vi.mocked(api.deleteEmployee).mockResolvedValue(undefined);
+    const user = userEvent.setup();
+    renderList();
+
+    await user.click(await screen.findByRole('button', { name: 'Delete Employee 1' }));
+    await user.click(screen.getByRole('button', { name: 'Delete employee' }));
+
+    const notice = await screen.findByText('Employee 1 was deleted.');
+    await waitFor(() => expect(notice.closest('[tabindex="-1"]')).toHaveFocus());
   });
 });

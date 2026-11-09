@@ -65,8 +65,8 @@ export function isStatus(error: unknown, status: number): error is ApiError {
   return isApiError(error) && error.status === status;
 }
 
-/** The best single human message for an error: the detail when the server gave one, otherwise the title. */
+/** The best single human message for an error: the server's detail, else its first field error, else the title. */
 export function errorMessage(error: unknown): string {
-  if (isApiError(error)) return error.detail ?? error.title;
+  if (isApiError(error)) return error.detail ?? Object.values(error.fieldErrors)[0]?.[0] ?? error.title;
   return 'Something went wrong. Please try again.';
 }

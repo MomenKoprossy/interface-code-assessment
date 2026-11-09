@@ -57,8 +57,17 @@
     margin-top: $space-1;
   }
 
+  &--header + & {
+    margin-top: $space-1;
+  }
+
   @include below($breakpoint-sm) {
     grid-template-columns: minmax(0, 1fr) auto;
+
+    // The name takes a row of its own here, so the column labels wouldn't line up; placeholders remain.
+    &--header {
+      display: none;
+    }
 
     &__name {
       grid-column: 1 / -1;

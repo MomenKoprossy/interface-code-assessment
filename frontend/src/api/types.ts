@@ -96,11 +96,3 @@ export interface Payslip {
   netPay: number;
   roundingRule: string;
 }
-
-export interface PayrollPolicy {
-  currency: string;
-  deductSocialInsuranceBeforeTax: boolean;
-  socialInsurance: { rate: number; monthlyCap: number | null };
-  taxBrackets: { upTo: number | null; rate: number }[];
-  roundingRule: string;
-}

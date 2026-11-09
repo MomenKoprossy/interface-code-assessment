@@ -7,16 +7,13 @@ export interface TextFieldProps extends NativeInputProps {
   value: string;
   onChange: (value: string) => void;
   error?: string;
-  hint?: string;
   /** Visually hides the label (still read by screen readers), for compact rows. */
   hideLabel?: boolean;
 }
 
-export function TextField({ label, value, onChange, error, hint, hideLabel, className, ...input }: TextFieldProps) {
+export function TextField({ label, value, onChange, error, hideLabel, className, ...input }: TextFieldProps) {
   const id = useId();
-  const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
-  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
 
   return (
     <div className={`field${error ? ' field--invalid' : ''}${className ? ` ${className}` : ''}`}>
@@ -31,13 +28,8 @@ export function TextField({ label, value, onChange, error, hint, hideLabel, clas
         value={value}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
+        aria-describedby={errorId}
       />
-      {hint && (
-        <p id={hintId} className="field__hint">
-          {hint}
-        </p>
-      )}
       {error && (
         <p id={errorId} className="field__error" role="alert">
           {error}

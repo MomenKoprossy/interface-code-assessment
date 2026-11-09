@@ -74,7 +74,7 @@
   &__section th {
     padding-top: $space-4;
     font-size: $font-size-sm;
-    font-weight: 700 !important;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: $color-text-muted;
@@ -89,17 +89,17 @@
   &__total {
     th,
     td {
-      font-weight: 600 !important;
+      font-weight: 600;
     }
   }
 
   &__net {
     th,
     td {
-      padding-top: $space-3 !important;
-      border-bottom: 0 !important;
+      padding-top: $space-3;
+      border-bottom: 0;
       font-size: $font-size-lg;
-      font-weight: 700 !important;
+      font-weight: 700;
       color: $color-accent-hover;
     }
   }

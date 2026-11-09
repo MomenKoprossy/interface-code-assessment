@@ -6,6 +6,7 @@ $color-surface: #ffffff;
 $color-surface-alt: #f9fafb;
 $color-border: #e2e5ea;
 $color-border-strong: #c4c9d2;
+$color-control-border: #8a93a3; // >= 3:1 on white, so the input boundary is visible (WCAG 1.4.11)
 $color-text: #1d2433;
 $color-text-muted: #4b5565;
 
@@ -19,8 +20,6 @@ $color-danger-hover: #912018;
 $color-danger-soft: #fef3f2;
 $color-success: #067647;
 $color-success-soft: #ecfdf3;
-$color-warning: #93370d;
-$color-warning-soft: #fffaeb;
 $color-info: #1d4ed8;
 $color-info-soft: #eff6ff;
 $color-focus: #4f46e5;

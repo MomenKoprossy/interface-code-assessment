@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { errorMessage } from '../../api/problem';
 import { Alert } from '../../shared/components/Alert';
@@ -16,6 +16,10 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Sign in · Employee Payroll';
+  }, []);
 
   if (user && !submitting) return <Navigate to={homePathFor(user.role)} replace />;
 
@@ -44,11 +48,20 @@ export function LoginPage() {
         {sessionExpired && !error && <Alert tone="info">Your session has expired. Please sign in again.</Alert>}
         {error && <Alert>{error}</Alert>}
         <form onSubmit={handleSubmit} noValidate className="stack">
-          <TextField label="Email" type="email" autoComplete="username" value={email} onChange={setEmail} required />
+          <TextField
+            label="Email"
+            type="email"
+            autoComplete="username"
+            maxLength={254}
+            value={email}
+            onChange={setEmail}
+            required
+          />
           <TextField
             label="Password"
             type="password"
             autoComplete="current-password"
+            maxLength={128}
             value={password}
             onChange={setPassword}
             required

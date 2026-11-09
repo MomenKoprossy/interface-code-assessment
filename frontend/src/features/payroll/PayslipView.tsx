@@ -27,7 +27,8 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
           <AmountRow label="Base salary" amount={money(payslip.baseSalary)} />
           <ItemRows items={payslip.allowances} money={money} />
           <AmountRow label="Gross pay" amount={money(payslip.grossPay)} total />
-
+        </tbody>
+        <tbody>
           <SectionRow title="Deductions" />
           <AmountRow
             label={`Social insurance (${formatRate(si.rate)} of base salary)`}

@@ -26,8 +26,10 @@ export function signInAs(role: Role, overrides: Partial<CurrentUser> = {}): Curr
   return user;
 }
 
+export type RouteEntry = string | { pathname: string; search?: string; state?: unknown };
+
 /** Renders `element` at `path` (a route pattern) inside a router + auth provider, starting at `url`. */
-export function renderRoute(element: ReactElement, { path = '/', url = '/' }: { path?: string; url?: string } = {}) {
+export function renderRoute(element: ReactElement, { path = '/', url = '/' }: { path?: string; url?: RouteEntry } = {}) {
   return render(
     <MemoryRouter initialEntries={[url]}>
       <AuthProvider>

@@ -83,6 +83,14 @@ describe('request', () => {
     expect(isStatus(error, 400)).toBe(true);
   });
 
+  it('uses the first field error as the message when a 400 has no detail', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(400, { title: 'Validation failed', status: 400, errors: { email: ['Email must be a valid email address.'] } }),
+    );
+    const error = await capture(request('/auth/login', { method: 'POST', body: {} }));
+    expect(errorMessage(error)).toBe('Email must be a valid email address.');
+  });
+
   it('keeps the 422 detail for a friendly notice', async () => {
     fetchMock.mockResolvedValue(
       jsonResponse(422, { title: 'Business rule violated', status: 422, detail: 'Employee was not yet hired in 2019-01.' }),
@@ -131,6 +139,22 @@ describe('request', () => {
     expect(error.status).toBe(401);
     expect(onExpired).toHaveBeenCalledOnce();
     expect(sessionStorage.length).toBe(0);
+  });
+
+  it('signals expiry on a 401 when the stored session had already expired (no token sent)', async () => {
+    sessionStorage.setItem(
+      'employee-payroll.session',
+      JSON.stringify({ accessToken: 'old', expiresAtUtc: '2000-01-01T00:00:00Z', user: { id: 'u1' } }),
+    );
+    const onExpired = vi.fn();
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    fetchMock.mockResolvedValue(jsonResponse(401, { title: 'Unauthorized', status: 401 }));
+
+    await capture(request('/employees'));
+
+    window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).not.toHaveProperty('Authorization');
+    expect(onExpired).toHaveBeenCalledOnce();
   });
 
   it('does not treat a failed login (401 without a token) as an expired session', async () => {
