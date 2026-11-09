@@ -11,7 +11,9 @@ namespace Microsoft.Extensions.Hosting;
 
 /// <summary>
 /// Aspire service defaults: OpenTelemetry (structured logs, traces, metrics; OTLP export when
-/// <c>OTEL_EXPORTER_OTLP_ENDPOINT</c> is set), health checks, service discovery and HTTP resilience.
+/// <c>OTEL_EXPORTER_OTLP_ENDPOINT</c> is set) and health checks.
+/// No service discovery or HTTP resilience: the API makes no outgoing HTTP calls (BuildingBlocks.Grpc wires
+/// both for its clients).
 /// </summary>
 public static class Extensions
 {
@@ -22,13 +24,6 @@ public static class Extensions
     {
         builder.ConfigureOpenTelemetry();
         builder.AddDefaultHealthChecks();
-
-        builder.Services.AddServiceDiscovery();
-        builder.Services.ConfigureHttpClientDefaults(http =>
-        {
-            http.AddStandardResilienceHandler();
-            http.AddServiceDiscovery();
-        });
 
         return builder;
     }

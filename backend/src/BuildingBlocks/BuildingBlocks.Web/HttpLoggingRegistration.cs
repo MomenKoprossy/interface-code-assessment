@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BuildingBlocks.Web;
 
 /// <summary>
-/// Inbound request/response logging for every request — metadata only (method, path, query, status,
-/// duration), one entry per request. Bodies are off by default (PII + size).
+/// Inbound request/response logging for every request — metadata only (method, path, status, duration),
+/// one entry per request. Query strings and bodies are left out: they can carry PII (e.g. <c>?search=</c> by email).
 /// </summary>
 public static class HttpLoggingRegistration
 {
@@ -15,7 +15,6 @@ public static class HttpLoggingRegistration
             options.LoggingFields =
                 HttpLoggingFields.RequestMethod
                 | HttpLoggingFields.RequestPath
-                | HttpLoggingFields.RequestQuery
                 | HttpLoggingFields.ResponseStatusCode
                 | HttpLoggingFields.Duration;
             options.CombineLogs = true;

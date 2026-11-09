@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using AwesomeAssertions;
 using BuildingBlocks.Web;
@@ -22,15 +23,19 @@ public class LoginRateLimitTests
         return app.Build();
     }
 
-    private static async Task<int> SendAsync(RequestDelegate pipeline, string ip, bool loginEndpoint = true)
+    private static async Task<int> SendAsync(RequestDelegate pipeline, string ip, bool loginEndpoint = true) =>
+        (await SendForResponseAsync(pipeline, ip, loginEndpoint)).StatusCode;
+
+    private static async Task<HttpResponse> SendForResponseAsync(RequestDelegate pipeline, string ip, bool loginEndpoint = true)
     {
         var context = new DefaultHttpContext { Connection = { RemoteIpAddress = IPAddress.Parse(ip) } };
+        context.Response.Body = new MemoryStream();
         var metadata = loginEndpoint
             ? new EndpointMetadataCollection(new EnableRateLimitingAttribute(SecurityRegistration.LoginRateLimitPolicy))
             : EndpointMetadataCollection.Empty;
         context.SetEndpoint(new Endpoint(_ => Task.CompletedTask, metadata, "test"));
         await pipeline(context);
-        return context.Response.StatusCode;
+        return context.Response;
     }
 
     [Fact]
@@ -53,5 +58,18 @@ public class LoginRateLimitTests
         for (var i = 0; i < 10; i++)
             (await SendAsync(pipeline, "10.0.0.1")).Should().Be(200);
         (await SendAsync(pipeline, "10.0.0.1")).Should().Be(429);
+    }
+
+    [Fact]
+    public async Task Rejection_sets_Retry_After_and_leaves_the_body_to_status_code_pages()
+    {
+        var pipeline = Pipeline(new() { ["RateLimiting:LoginPermitLimit"] = "1" });
+        await SendAsync(pipeline, "10.0.0.1");
+
+        var rejected = await SendForResponseAsync(pipeline, "10.0.0.1");
+
+        rejected.StatusCode.Should().Be(429);
+        int.Parse(rejected.Headers.RetryAfter.ToString(), CultureInfo.InvariantCulture).Should().BeInRange(1, 60);
+        rejected.Body.Length.Should().Be(0, "OnRejected must not write a body; UseStatusCodePages renders the ProblemDetails");
     }
 }
