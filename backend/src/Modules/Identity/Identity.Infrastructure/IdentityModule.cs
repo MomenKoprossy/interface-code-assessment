@@ -1,8 +1,16 @@
+using BuildingBlocks.Application;
 using BuildingBlocks.Data;
+using BuildingBlocks.Web;
+using Identity.Application;
 using Identity.Infrastructure.Persistence;
+using Identity.Infrastructure.Security;
+using Identity.Infrastructure.Seeding;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace Identity.Infrastructure;
 
@@ -11,15 +19,38 @@ public static class IdentityModule
 {
     public static IHostApplicationBuilder AddIdentityModule(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddSingleton<IModuleModelConfiguration, IdentityModelConfiguration>();
-        // SCAFFOLD: build:identity registers JWT options (validated on start), the token issuer,
-        // password hashing, the user repository and the seeder here.
+        var services = builder.Services;
+
+        services.AddSingleton<IModuleModelConfiguration, IdentityModelConfiguration>();
+
+        services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.SectionName).ValidateOnStart();
+        services.AddSingleton<IValidateOptions<JwtOptions>, JwtOptionsValidator>();
+        services.AddSingleton<ITokenIssuer, JwtTokenIssuer>();
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IDataSeeder, IdentitySeeder>();
+
         return builder;
     }
 
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder api)
     {
-        // SCAFFOLD: build:identity maps /auth endpoints here (api is already grouped under /api).
+        var auth = api.MapGroup("/auth").WithTags("Auth");
+
+        auth.MapPost("/login", async (LoginCommand command, ISender sender, CancellationToken ct) =>
+                (await sender.Send(command, ct)).ToHttpResult())
+            .AllowAnonymous()
+            .Produces<LoginResponse>()
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        auth.MapGet("/me", async (ISender sender, CancellationToken ct) =>
+                (await sender.Send(new GetCurrentUserQuery(), ct)).ToHttpResult())
+            .RequireAuthorization()
+            .Produces<CurrentUserDto>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
         return api;
     }
 }

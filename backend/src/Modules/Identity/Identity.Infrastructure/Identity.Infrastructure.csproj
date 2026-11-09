@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Identity.UnitTests" />
     <InternalsVisibleTo Include="Api.IntegrationTests" />
   </ItemGroup>
