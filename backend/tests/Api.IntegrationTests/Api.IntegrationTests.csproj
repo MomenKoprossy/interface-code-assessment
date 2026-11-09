@@ -5,6 +5,8 @@
     <RootNamespace>Api.IntegrationTests</RootNamespace>
     <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
     <IsPackable>false</IsPackable>
+    <!-- HttpClient calls: per-call TestContext cancellation tokens add noise, not value, in this suite. -->
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
