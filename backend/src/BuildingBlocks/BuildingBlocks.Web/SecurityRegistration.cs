@@ -14,23 +14,27 @@ namespace BuildingBlocks.Web;
 
 /// <summary>
 /// Security baseline: JWT bearer (symmetric key from config section <c>Jwt</c>), the permission
-/// policy provider + handler (exact permission claim), a global fixed-window rate limiter, and
-/// sensible security headers. Wired by <c>AddPlatform()</c>.
+/// policy provider + handler (exact permission claim), a global fixed-window rate limiter plus the named
+/// <see cref="LoginRateLimitPolicy"/>, and sensible security headers. Wired by <c>AddPlatform()</c>.
 /// </summary>
 public static class SecurityRegistration
 {
+    /// <summary>
+    /// Named rate-limit policy for the login endpoint (<c>.RequireRateLimiting("login")</c>): a fixed window of
+    /// <c>RateLimiting:LoginPermitLimit</c> (default 10) attempts per minute per client IP, on top of the global limit.
+    /// </summary>
+    public const string LoginRateLimitPolicy = "login";
+
     /// <summary>Default global rate-limit window: 100 requests / 10s per client IP (overridable via the <c>RateLimiting</c> section).</summary>
     private const int DefaultPermitLimit = 100;
     private const int DefaultWindowSeconds = 10;
+    private const int DefaultLoginPermitLimit = 10;
 
     public static IServiceCollection AddPlatformSecurity(this IServiceCollection services, IConfiguration configuration)
     {
         AddJwtAuthentication(services, configuration);
         AddPermissionAuthorization(services);
-        AddRateLimiting(
-            services,
-            configuration.GetValue("RateLimiting:PermitLimit", DefaultPermitLimit),
-            TimeSpan.FromSeconds(configuration.GetValue("RateLimiting:WindowSeconds", DefaultWindowSeconds)));
+        AddRateLimiting(services, configuration);
         AddSecurityHeaders(services);
         return services;
     }
@@ -67,21 +71,32 @@ public static class SecurityRegistration
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
     }
 
-    private static void AddRateLimiting(IServiceCollection services, int permitLimit, TimeSpan window) =>
+    private static void AddRateLimiting(IServiceCollection services, IConfiguration configuration)
+    {
+        var permitLimit = configuration.GetValue("RateLimiting:PermitLimit", DefaultPermitLimit);
+        var window = TimeSpan.FromSeconds(configuration.GetValue("RateLimiting:WindowSeconds", DefaultWindowSeconds));
+        var loginPermitLimit = configuration.GetValue("RateLimiting:LoginPermitLimit", DefaultLoginPermitLimit);
+
         services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
-                RateLimitPartition.GetFixedWindowLimiter(
-                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
-                    factory: _ => new FixedWindowRateLimiterOptions
-                    {
-                        PermitLimit = permitLimit,
-                        Window = window,
-                        QueueLimit = 0,
-                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                    }));
+                PerClientIp(httpContext, permitLimit, window));
+            options.AddPolicy(LoginRateLimitPolicy, httpContext =>
+                PerClientIp(httpContext, loginPermitLimit, TimeSpan.FromMinutes(1)));
         });
+    }
+
+    private static RateLimitPartition<string> PerClientIp(HttpContext httpContext, int permitLimit, TimeSpan window) =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = permitLimit,
+                Window = window,
+                QueueLimit = 0,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            });
 
     private static void AddSecurityHeaders(IServiceCollection services) =>
         services.AddSecurityHeaderPolicies()

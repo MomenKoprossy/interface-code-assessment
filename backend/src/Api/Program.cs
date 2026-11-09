@@ -42,12 +42,16 @@ var app = builder.Build();
 
 app.UsePlatform();
 app.MapDefaultEndpoints();
-app.MapOpenApi();
-app.UseSwaggerUI(swagger =>
+// API docs: always in Development; elsewhere only when OpenApi:Enabled=true (docker compose sets it for reviewers).
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("OpenApi:Enabled"))
 {
-    swagger.SwaggerEndpoint("/openapi/v1.json", "Employee Payroll API v1");
-    swagger.RoutePrefix = "swagger";
-});
+    app.MapOpenApi();
+    app.UseSwaggerUI(swagger =>
+    {
+        swagger.SwaggerEndpoint("/openapi/v1.json", "Employee Payroll API v1");
+        swagger.RoutePrefix = "swagger";
+    });
+}
 
 var api = app.MapGroup("/api");
 api.MapIdentityEndpoints();
