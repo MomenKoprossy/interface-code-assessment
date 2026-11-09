@@ -11,6 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- ILike search and the unique-violation (SqlState 23505) mapping are PostgreSQL-specific. -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Employees\Employees.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Data\BuildingBlocks.Data.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Web\BuildingBlocks.Web.csproj" />
