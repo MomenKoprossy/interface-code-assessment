@@ -21,7 +21,7 @@ public static class PayrollModule
         services.AddSingleton<IValidateOptions<PayrollOptions>, PayrollOptionsValidator>();
         services.AddSingleton<IPayrollPolicyProvider, ConfiguredPayrollPolicyProvider>();
 
-        // Pipeline order = registration order. A new deduction type is one more line here.
+        // Pipeline order = registration order. A new post-tax deduction type is one more line here.
         services.AddSingleton<IPayrollRule, GrossEarningsRule>();
         services.AddSingleton<IPayrollRule, SocialInsuranceRule>();
         services.AddSingleton<IPayrollRule, IncomeTaxRule>();
