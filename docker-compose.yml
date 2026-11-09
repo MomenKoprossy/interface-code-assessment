@@ -29,6 +29,8 @@ services:
       ConnectionStrings__appdb: Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env (at least 32 bytes, see .env.example)}
       Seed__Enabled: "true"
+      # Swagger UI and the OpenAPI document, enabled for assessment reviewers (off by default outside Development).
+      OpenApi__Enabled: "true"
       Seed__DemoPassword: ${DEMO_PASSWORD:?set DEMO_PASSWORD in .env}
       Logging__Console__FormatterName: json
     healthcheck:
@@ -46,7 +48,8 @@ services:
       api:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      # Loopback only: the demo stack (seeded logins) is not published to the LAN.
+      - "127.0.0.1:8080:8080"
 
 volumes:
   postgres-data:
