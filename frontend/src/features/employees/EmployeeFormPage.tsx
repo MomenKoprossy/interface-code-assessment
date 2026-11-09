@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { createEmployee, getEmployee, updateEmployee } from '../../api/employees';
 import { errorMessage, isStatus } from '../../api/problem';
 import type { EmployeeInput } from '../../api/types';
@@ -13,20 +13,22 @@ import { emptyFormValues, toFormValues } from './mapping';
 export function EmployeeFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  // The list passes its search string, so back, cancel and save return to the same filters and page.
+  const listUrl = `/employees${(useLocation().state as { from?: string } | null)?.from ?? ''}`;
   const existing = useAsync(id ?? null, (signal) => getEmployee(id ?? '', signal));
 
   async function save(input: EmployeeInput) {
     const saved = id ? await updateEmployee(id, input) : await createEmployee(input);
-    navigate('/employees', { state: { notice: `${saved.fullName} was ${id ? 'updated' : 'added'}.` } });
+    navigate(listUrl, { state: { notice: `${saved.fullName} was ${id ? 'updated' : 'added'}.` } });
   }
 
-  const backLink = <Link to="/employees">← Back to employees</Link>;
+  const backLink = <Link to={listUrl}>← Back to employees</Link>;
 
   if (!id) {
     return (
       <>
         <PageHeader title="Add employee" subtitle={backLink} />
-        <EmployeeForm initialValues={emptyFormValues()} submitLabel="Add employee" onSubmit={save} />
+        <EmployeeForm initialValues={emptyFormValues()} submitLabel="Add employee" cancelTo={listUrl} onSubmit={save} />
       </>
     );
   }
@@ -41,7 +43,13 @@ export function EmployeeFormPage() {
         </Alert>
       )}
       {existing.data && (
-        <EmployeeForm key={existing.data.id} initialValues={toFormValues(existing.data)} submitLabel="Save changes" onSubmit={save} />
+        <EmployeeForm
+          key={existing.data.id}
+          initialValues={toFormValues(existing.data)}
+          submitLabel="Save changes"
+          cancelTo={listUrl}
+          onSubmit={save}
+        />
       )}
     </>
   );

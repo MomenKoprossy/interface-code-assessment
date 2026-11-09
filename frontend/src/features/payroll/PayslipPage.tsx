@@ -1,5 +1,5 @@
-import { useId } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useId, useState } from 'react';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { errorMessage, isStatus } from '../../api/problem';
 import { Alert } from '../../shared/components/Alert';
 import { PageHeader } from '../../shared/components/PageHeader';
@@ -15,22 +15,33 @@ export function PayslipPage() {
   const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const monthInputId = useId();
+  const location = useLocation();
+  const listUrl = `/employees${(location.state as { from?: string } | null)?.from ?? ''}`;
 
   const employeeId = id ?? user?.employeeId ?? null;
   const requested = params.get('month') ?? '';
   const month = MONTH_PATTERN.test(requested) ? requested : currentMonth();
   const payslip = usePayslip(employeeId, month);
 
+  // The input keeps its own draft so a half-typed month (text fallback where there is no native picker) isn't
+  // replaced on every keystroke; only a complete month reaches the URL. Back/forward still syncs the draft.
+  const [draft, setDraft] = useState(month);
+  const [syncedMonth, setSyncedMonth] = useState(month);
+  if (month !== syncedMonth) {
+    setSyncedMonth(month);
+    setDraft(month);
+  }
+
   const changeMonth = (value: string) => {
-    // An emptied picker means "back to the default" rather than an invalid request.
-    setParams(value ? { month: value } : {}, { replace: true });
+    setDraft(value);
+    if (MONTH_PATTERN.test(value)) setParams({ month: value }, { replace: true, state: location.state });
   };
 
   return (
     <>
       <PageHeader
         title={id ? 'Payslip' : 'My payslip'}
-        subtitle={id ? <Link to="/employees">← Back to employees</Link> : undefined}
+        subtitle={id ? <Link to={listUrl}>← Back to employees</Link> : undefined}
       />
 
       <div className="card payslip-toolbar">
@@ -41,7 +52,9 @@ export function PayslipPage() {
           id={monthInputId}
           type="month"
           className="field__control payslip-toolbar__month"
-          value={month}
+          min="1900-01"
+          placeholder="YYYY-MM"
+          value={draft}
           onChange={(event) => changeMonth(event.target.value)}
         />
       </div>
@@ -53,7 +66,8 @@ export function PayslipPage() {
       )}
       {payslip.loading && <Spinner label={`Loading payslip for ${formatMonth(month)}…`} />}
       {payslip.error !== undefined && <PayslipError error={payslip.error} />}
-      {payslip.data && <PayslipView payslip={payslip.data} />}
+      {/* Never show the previous month's payslip while the next one loads. */}
+      {payslip.data && !payslip.loading && <PayslipView payslip={payslip.data} />}
     </>
   );
 }

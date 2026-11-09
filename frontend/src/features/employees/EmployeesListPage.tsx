@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { errorMessage } from '../../api/problem';
 import type { EmployeeListItem } from '../../api/types';
 import { Alert } from '../../shared/components/Alert';
@@ -27,7 +27,9 @@ export function EmployeesListPage() {
   const employees = useEmployees(query);
   const departments = useDepartments();
   const location = useLocation();
+  const navigate = useNavigate();
   const [notice, setNotice] = useState<string | null>((location.state as { notice?: string } | null)?.notice ?? null);
+  const noticeRef = useRef<HTMLDivElement>(null);
   const [toDelete, setToDelete] = useState<EmployeeListItem | null>(null);
 
   const urlSearch = query.search ?? '';
@@ -39,11 +41,22 @@ export function EmployeesListPage() {
     if (urlSearch !== searchText.trim()) setSearchText(urlSearch);
   }
 
+  // The notice was read once; clear it from history so a refresh or Back doesn't show it again.
+  useEffect(() => {
+    if (location.state) navigate({ search: location.search }, { replace: true, state: null });
+  }, [location.state, location.search, navigate]);
+
+  // Focus the notice so it is announced, and so focus isn't lost when the deleted row disappears.
+  useEffect(() => {
+    if (notice) noticeRef.current?.focus();
+  }, [notice]);
+
   const debounceTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(debounceTimer.current), []);
 
   function changeSearch(value: string) {
     setSearchText(value);
+    setNotice(null);
     window.clearTimeout(debounceTimer.current);
     debounceTimer.current = window.setTimeout(
       () => setParams((current) => updateListParams(current, { search: value.trim() })),
@@ -51,9 +64,15 @@ export function EmployeesListPage() {
     );
   }
 
-  const setFilter = (name: 'department' | 'status', value: string) =>
+  function setFilter(name: 'department' | 'status', value: string) {
+    setNotice(null);
     setParams((current) => updateListParams(current, { [name]: value }));
-  const goToPage = (page: number) => setParams((current) => updateListParams(current, { page: String(page) }));
+  }
+
+  function goToPage(page: number) {
+    setNotice(null);
+    setParams((current) => updateListParams(current, { page: String(page) }));
+  }
 
   function handleDeleteDone(outcome: DeleteOutcome) {
     const name = toDelete?.fullName ?? 'The employee';
@@ -78,13 +97,17 @@ export function EmployeesListPage() {
         title="Employees"
         subtitle={result ? `${result.totalCount} ${result.totalCount === 1 ? 'employee' : 'employees'}` : undefined}
         actions={
-          <Link to="/employees/new" className={buttonClass('primary')}>
+          <Link to="/employees/new" state={{ from: location.search }} className={buttonClass('primary')}>
             + Add employee
           </Link>
         }
       />
 
-      {notice && <Alert tone="success">{notice}</Alert>}
+      {notice && (
+        <div ref={noticeRef} tabIndex={-1}>
+          <Alert tone="success">{notice}</Alert>
+        </div>
+      )}
 
       <section className="filters card" aria-label="Filters">
         <TextField
@@ -117,7 +140,8 @@ export function EmployeesListPage() {
           </Button>
         </Alert>
       )}
-      {employees.loading && <Spinner label="Loading employees…" />}
+      {/* While a page or reload loads, the previous rows stay mounted so the focused control isn't lost. */}
+      {employees.loading && !result && <Spinner label="Loading employees…" />}
 
       {result && result.items.length === 0 && (
         <div className="empty-state card">
@@ -140,7 +164,7 @@ export function EmployeesListPage() {
 
       {result && result.items.length > 0 && (
         <>
-          <EmployeeTable items={result.items} onDelete={setToDelete} />
+          <EmployeeTable items={result.items} busy={employees.loading} onDelete={setToDelete} />
           <Pagination page={result.page} totalPages={result.totalPages} onPageChange={goToPage} />
         </>
       )}
@@ -152,9 +176,17 @@ export function EmployeesListPage() {
   );
 }
 
-function EmployeeTable({ items, onDelete }: { items: EmployeeListItem[]; onDelete: (e: EmployeeListItem) => void }) {
+interface EmployeeTableProps {
+  items: EmployeeListItem[];
+  busy: boolean;
+  onDelete: (employee: EmployeeListItem) => void;
+}
+
+function EmployeeTable({ items, busy, onDelete }: EmployeeTableProps) {
+  // The edit and payslip pages link back to the list with its filters and page intact.
+  const from = useLocation().search;
   return (
-    <table className="data-table">
+    <table className="data-table" aria-busy={busy}>
       <caption className="visually-hidden">Employees</caption>
       <thead>
         <tr>
@@ -190,6 +222,7 @@ function EmployeeTable({ items, onDelete }: { items: EmployeeListItem[]; onDelet
             <td className="data-table__actions">
               <Link
                 to={`/employees/${employee.id}/edit`}
+                state={{ from }}
                 className={buttonClass('secondary', true)}
                 aria-label={`Edit ${employee.fullName}`}
               >
@@ -197,6 +230,7 @@ function EmployeeTable({ items, onDelete }: { items: EmployeeListItem[]; onDelet
               </Link>
               <Link
                 to={`/employees/${employee.id}/payslip`}
+                state={{ from }}
                 className={buttonClass('secondary', true)}
                 aria-label={`Payslip for ${employee.fullName}`}
               >

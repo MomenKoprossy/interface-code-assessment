@@ -25,6 +25,8 @@ type SimpleField = Exclude<keyof EmployeeFormValues, PayItemList>;
 interface EmployeeFormProps {
   initialValues: EmployeeFormValues;
   submitLabel: string;
+  /** Where Cancel goes: the list, with its filters and page. */
+  cancelTo?: string;
   /** Throws an ApiError on failure; 400/409 field errors are mapped onto the form. */
   onSubmit: (input: EmployeeInput) => Promise<void>;
   /** `YYYY-MM-DD` (UTC); injectable so tests don't depend on the real clock. */
@@ -39,7 +41,13 @@ function withError(errors: FormErrors, path: string, message: string | undefined
   return next;
 }
 
-export function EmployeeForm({ initialValues, submitLabel, onSubmit, today = todayUtc() }: EmployeeFormProps) {
+export function EmployeeForm({
+  initialValues,
+  submitLabel,
+  cancelTo = '/employees',
+  onSubmit,
+  today = todayUtc(),
+}: EmployeeFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -157,7 +165,7 @@ export function EmployeeForm({ initialValues, submitLabel, onSubmit, today = tod
       ))}
 
       <div className="form-actions">
-        <Link to="/employees" className={buttonClass('secondary')}>
+        <Link to={cancelTo} className={buttonClass('secondary')}>
           Cancel
         </Link>
         <Button type="submit" disabled={saving}>
@@ -197,6 +205,14 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
         </p>
       )}
       {items.length === 0 && <p className="form-section__empty">None.</p>}
+      {items.length > 0 && (
+        // Visible column labels; each input keeps its own (screen-reader) label.
+        <div className="pay-item pay-item--header" aria-hidden="true">
+          <span className="field__label">Name</span>
+          <span className="field__label">Amount (monthly)</span>
+          <span />
+        </div>
+      )}
       {items.map((item, index) => (
         <div className="pay-item" key={item.key}>
           <TextField

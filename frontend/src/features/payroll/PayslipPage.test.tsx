@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '../../api/payroll';
 import { ApiError } from '../../api/problem';
@@ -110,6 +111,34 @@ describe('PayslipPage', () => {
     fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2026-04' } });
 
     await waitFor(() => expect(api.getPayslip).toHaveBeenLastCalledWith('emp-9', '2026-04', expect.any(AbortSignal)));
+  });
+
+  it('does not snap a half-typed month back while typing (text fallback without a native picker)', async () => {
+    signInAs('HR');
+    renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-9/payslip?month=2026-03' });
+    await screen.findByText('$9,875.00');
+    // jsdom sanitizes partial values of type="month" to '', so simulate the text-box fallback browsers render.
+    const input = screen.getByLabelText('Month');
+    input.setAttribute('type', 'text');
+    const user = userEvent.setup();
+
+    await user.clear(input);
+    await user.type(input, '2025-03');
+
+    expect(input).toHaveValue('2025-03');
+    await waitFor(() => expect(api.getPayslip).toHaveBeenLastCalledWith('emp-9', '2025-03', expect.any(AbortSignal)));
+    expect(api.getPayslip).not.toHaveBeenCalledWith('emp-9', currentMonth(), expect.any(AbortSignal));
+  });
+
+  it('shows the server field message for a rejected month instead of a generic title', async () => {
+    signInAs('HR');
+    vi.mocked(api.getPayslip).mockRejectedValue(
+      new ApiError({ status: 400, title: 'Validation failed', fieldErrors: { month: ['Month must be between 1900-01 and 9999-12.'] } }),
+    );
+    renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=1800-01' });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Month must be between 1900-01 and 9999-12.');
+    expect(screen.getByLabelText('Month')).toHaveAttribute('min', '1900-01');
   });
 
   it('shows a 422 as a friendly notice using the server detail', async () => {
