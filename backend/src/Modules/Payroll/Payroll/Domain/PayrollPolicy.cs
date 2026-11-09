@@ -18,6 +18,8 @@ public sealed record PayrollPolicy(
             problems.Add("SocialInsurance.Rate must be between 0 and 1.");
         if (SocialInsurance.MonthlyCap is <= 0)
             problems.Add("SocialInsurance.MonthlyCap must be null (no cap) or greater than 0.");
+        if (SocialInsurance.MonthlyCap is { } cap && !HasAtMostTwoDecimals(cap))
+            problems.Add("SocialInsurance.MonthlyCap must have at most 2 decimals.");
 
         if (TaxBrackets.Count == 0)
         {
@@ -43,6 +45,8 @@ public sealed record PayrollPolicy(
 
             if (isLast)
                 problems.Add($"TaxBrackets[{i}].UpTo must be null: the last bracket is open-ended.");
+            if (!HasAtMostTwoDecimals(upTo))
+                problems.Add($"TaxBrackets[{i}].UpTo must have at most 2 decimals.");
             if (upTo <= previousUpTo)
                 problems.Add($"TaxBrackets[{i}].UpTo must be greater than {previousUpTo} (strictly ascending, starting above 0).");
             previousUpTo = upTo;
@@ -52,6 +56,9 @@ public sealed record PayrollPolicy(
     }
 
     private static bool IsRate(decimal rate) => rate is >= 0 and <= 1;
+
+    // Money amounts flow onto the payslip as-is, so they must already be whole cents.
+    private static bool HasAtMostTwoDecimals(decimal amount) => decimal.Round(amount, 2) == amount;
 }
 
 /// <summary>Social insurance: <see cref="Rate"/> of the base salary, capped at <see cref="MonthlyCap"/> when set.</summary>

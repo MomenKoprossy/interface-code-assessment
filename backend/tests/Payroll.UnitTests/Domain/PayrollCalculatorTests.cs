@@ -164,6 +164,35 @@ public class PayrollCalculatorTests
         act.Should().Throw<InvalidOperationException>().WithMessage("*SocialInsuranceRule*");
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void A_new_post_tax_deduction_is_one_rule_plus_one_registration(bool beforeOtherDeductions)
+    {
+        IPayrollRule[] rules = beforeOtherDeductions
+            ? [new GrossEarningsRule(), new SocialInsuranceRule(), new IncomeTaxRule(), new PensionRule(), new OtherDeductionsRule()]
+            : [new GrossEarningsRule(), new SocialInsuranceRule(), new IncomeTaxRule(), new OtherDeductionsRule(), new PensionRule()];
+        var employee = Employee(6000.00m, deductions: [new PayComponent("Loan", 200.00m)]);
+        var without = Payslip(employee);
+
+        var payslip = new PayrollCalculator(rules).Calculate(DefaultPolicy, employee, Month("2026-03")).Value;
+
+        payslip.OtherDeductions.Should().BeEquivalentTo([new PayItem("Loan", 200.00m), new PayItem("Pension", 50.00m)]);
+        payslip.TotalOtherDeductions.Should().Be(250.00m);
+        payslip.TotalDeductions.Should().Be(without.TotalDeductions + 50.00m);
+        payslip.NetPay.Should().Be(without.NetPay - 50.00m);
+    }
+
+    /// <summary>A test-only post-tax deduction: proves the pipeline is open for new deduction types.</summary>
+    private sealed class PensionRule : IPayrollRule
+    {
+        public void Apply(PayslipDraft draft)
+        {
+            draft.OtherDeductions = [.. draft.OtherDeductions, new PayItem("Pension", 50.00m)];
+            draft.TotalOtherDeductions += 50.00m;
+        }
+    }
+
     private static void ShouldFail(EmployeePayrollProfile employee, string month, string message)
     {
         var result = Calculator().Calculate(DefaultPolicy, employee, Month(month));

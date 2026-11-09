@@ -73,6 +73,16 @@ public class PayrollPolicyValidationTests
         (Valid with { SocialInsurance = new SocialInsurancePolicy(0.11m, Dec(cap)) })
             .Validate().Should().ContainSingle().Which.Should().Contain("MonthlyCap");
 
+    [Fact]
+    public void Cap_with_more_than_2_decimals_fails() =>
+        (Valid with { SocialInsurance = new SocialInsurancePolicy(0.11m, 1100.005m) })
+            .Validate().Should().ContainSingle().Which.Should().Be("SocialInsurance.MonthlyCap must have at most 2 decimals.");
+
+    [Fact]
+    public void Upper_bound_with_more_than_2_decimals_fails() =>
+        (Valid with { TaxBrackets = [new TaxBracket(1500.005m, 0m), new TaxBracket(null, 0.1m)] })
+            .Validate().Should().ContainSingle().Which.Should().Be("TaxBrackets[0].UpTo must have at most 2 decimals.");
+
     [Theory]
     [InlineData("")]
     [InlineData("US")]

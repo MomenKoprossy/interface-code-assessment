@@ -55,7 +55,7 @@ public class PayrollModuleTests
     public void Invalid_policy_fails_options_validation_with_every_problem()
     {
         const string invalid = """
-            { "Payroll": { "Currency": "US", "SocialInsurance": { "Rate": 1.5, "MonthlyCap": -1 },
+            { "Payroll": { "Currency": "US", "DeductSocialInsuranceBeforeTax": true, "SocialInsurance": { "Rate": 1.5, "MonthlyCap": -1 },
                            "TaxBrackets": [ { "UpTo": 5000, "Rate": 0.1 }, { "UpTo": 1500, "Rate": 0 } ] } }
             """;
         using var services = BuildServices(invalid);
@@ -74,6 +74,23 @@ public class PayrollModuleTests
         var act = () => services.GetRequiredService<IOptions<PayrollOptions>>().Value;
 
         act.Should().Throw<OptionsValidationException>();
+    }
+
+    [Fact]
+    public void Missing_required_keys_fail_validation_instead_of_defaulting_to_0_or_false()
+    {
+        const string missingKeys = """
+            { "Payroll": { "Currency": "USD", "SocialInsurance": { "MonthlyCap": 1100 },
+                           "TaxBrackets": [ { "UpTo": 1500, "Rate": 0 }, { "UpTo": null } ] } }
+            """;
+        using var services = BuildServices(missingKeys);
+
+        var act = () => services.GetRequiredService<IOptions<PayrollOptions>>().Value;
+
+        act.Should().Throw<OptionsValidationException>().Which.Failures.Should().BeEquivalentTo(
+            "Payroll: DeductSocialInsuranceBeforeTax is required.",
+            "Payroll: SocialInsurance.Rate is required.",
+            "Payroll: TaxBrackets[1].Rate is required.");
     }
 
     [Fact]

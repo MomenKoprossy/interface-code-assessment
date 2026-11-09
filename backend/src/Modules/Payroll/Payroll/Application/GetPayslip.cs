@@ -9,9 +9,9 @@ namespace Payroll.Application;
 /// <summary>An employee's payslip for a month (<c>YYYY-MM</c>).</summary>
 public sealed record GetPayslipQuery(Guid EmployeeId, string? Month) : IQuery<Result<Payslip>>;
 
-internal sealed class GetPayslipQueryValidator : AbstractValidator<GetPayslipQuery>
+internal sealed class GetPayslipValidator : AbstractValidator<GetPayslipQuery>
 {
-    public GetPayslipQueryValidator() =>
+    public GetPayslipValidator() =>
         RuleFor(q => q.Month)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Month is required.")
@@ -35,7 +35,7 @@ internal sealed class GetPayslipHandler(
 
         var employee = await employees.GetAsync(query.EmployeeId, cancellationToken);
         if (employee is null)
-            return Error.NotFound("Employee not found.");
+            return Error.NotFound("Employee was not found.");
 
         return calculator.Calculate(policies.Current, employee, month);
     }
