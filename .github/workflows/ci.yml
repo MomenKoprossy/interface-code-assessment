@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # backend/global.json selects the SDK and the Microsoft.Testing.Platform runner; dotnet reads it from the cwd.
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+      - run: dotnet restore EmployeePayroll.slnx
+      - run: dotnet build EmployeePayroll.slnx -c Release --no-restore
+      # Integration tests start PostgreSQL with Testcontainers; Docker is preinstalled on ubuntu runners.
+      - run: dotnet test EmployeePayroll.slnx -c Release --no-build
+      - run: dotnet test src/BuildingBlocks/BuildingBlocks.slnx -c Release
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  docker:
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Placeholder values only: the images are built, never run, so compose just needs every required variable set.
+      - run: cp .env.example .env
+      - run: docker compose config --quiet
+      - run: docker compose build
