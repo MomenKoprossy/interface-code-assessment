@@ -107,7 +107,13 @@ payroll spec: [`.claude/docs/payroll-rules.md`](.claude/docs/payroll-rules.md) Â
 
 ## AI usage
 
-This project was built with **Claude Code** (Opus 5.5) orchestrating several sub-agents. Everything is documented in
-[`.claude/`](.claude/): the design docs written before any code, the orchestration plan (which agent owned what and
-why), the log of every phase, the review cycles and their verified findings, the test reports, and the tools, skills
-and instructions used ([`.claude/ai-usage/`](.claude/ai-usage/README.md)). I reviewed, ran and can explain every line.
+Built with **Claude Code** (Claude Opus 5.5) acting as an orchestrator over **41 sub-agents** in 6 workflow runs:
+parallel module builds in isolated git worktrees, two review rounds with adversarial verification, and fix rounds.
+**The code, tests, configuration and docs were AI-generated.** The platform building blocks come from my own
+DotnetPlayGround template, which the AI vendored and modified. The architecture and scope decisions were mine (listed with
+my verbatim prompts). I reviewed, ran and verified everything, and every agent claim was re-checked by re-running the suites.
+
+Everything is in [`ai-usage/`](ai-usage/README.md) â†’ [`.claude/ai-usage/`](.claude/ai-usage/README.md): prompts,
+full transcripts, the orchestration scripts, every skill, plugin, MCP server and instruction file with its reason. The
+process record is in [`.claude/process/`](.claude/process/): the plan, a phase-by-phase log, the review log with every
+finding and verdict, and the test report.
