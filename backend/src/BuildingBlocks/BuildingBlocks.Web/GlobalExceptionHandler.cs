@@ -29,9 +29,14 @@ internal sealed class GlobalExceptionHandler(
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        var problemDetails = exception is ValidationException validationException
-            ? FromValidation(validationException)
-            : mappers.Select(m => m.TryMap(exception)).FirstOrDefault(p => p is not null);
+        var problemDetails = exception switch
+        {
+            ValidationException validationException => FromValidation(validationException),
+            // Minimal-API binding failures (malformed JSON, wrong types) surface as BadHttpRequestException in
+            // Development; they are client errors, never 500s.
+            BadHttpRequestException badRequest => new ProblemDetails { Status = badRequest.StatusCode, Title = "The request could not be read" },
+            _ => mappers.Select(m => m.TryMap(exception)).FirstOrDefault(p => p is not null),
+        };
 
         if (problemDetails is null)
         {

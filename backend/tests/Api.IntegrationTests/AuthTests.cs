@@ -152,7 +152,7 @@ public sealed class AuthorizationTests(ApiFactory api)
 
     // The contract says every non-2xx is ProblemDetails, but 401/403 produced by the authentication/authorization
     // middleware (not by a handler) are written by the JWT challenge/forbid with an empty body.
-    [Fact(Skip = "BUG: 401/403 from the JWT/authorization middleware have an empty body, not application/problem+json with traceId (api-contract.md: every non-2xx is ProblemDetails). See productBugs.")]
+    [Fact]
     public async Task Middleware_401_and_403_are_problem_details()
     {
         using var anonymous = api.CreateClient();

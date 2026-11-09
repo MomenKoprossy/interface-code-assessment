@@ -38,8 +38,10 @@ public static class PlatformRegistration
     }
 
     /// <summary>
-    /// Applies the platform middleware in order: exception handling → HTTP logging → security headers
-    /// (which emit HSTS) → rate limiting → authentication → authorization.
+    /// Applies the platform middleware in order: exception handling → status-code pages → HTTP logging →
+    /// security headers (which emit HSTS) → rate limiting → authentication → authorization.
+    /// Status-code pages turn every bodiless error (JwtBearer 401 challenge, authorization 403, binding 400/415,
+    /// rate-limit 429, unmatched 404) into RFC 7807 ProblemDetails, so clients get one error format everywhere.
     /// NOTE on transport (§13.3): this is an internal microservices topology where TLS terminates at the
     /// gateway and service-to-service traffic flows over plaintext http resolved by service discovery
     /// (http://cms, http://attachment). Services therefore do NOT self-redirect to HTTPS — a
@@ -49,6 +51,7 @@ public static class PlatformRegistration
     public static WebApplication UsePlatform(this WebApplication app)
     {
         app.UseExceptionHandler();
+        app.UseStatusCodePages();
         app.UseHttpLogging();
         app.UseSecurityHeaders();
         app.UseRateLimiter();

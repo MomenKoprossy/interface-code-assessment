@@ -116,7 +116,7 @@ public sealed class EmployeesCrudTests(ApiFactory api)
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
-    [Fact(Skip = "BUG: minimal-API binding failures (malformed JSON, wrong JSON type, non-numeric page) return 400 with an empty body, not application/problem+json with traceId. See productBugs.")]
+    [Fact]
     public async Task Binding_failures_are_400_problem_details()
     {
         using var hr = await api.HrClientAsync();
