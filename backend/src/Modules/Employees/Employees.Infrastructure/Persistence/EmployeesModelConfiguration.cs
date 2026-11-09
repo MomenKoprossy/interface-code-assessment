@@ -19,10 +19,10 @@ public sealed class EmployeesModelConfiguration : IModuleModelConfiguration
         employee.HasKey(e => e.Id);
         employee.Property(e => e.Id).ValueGeneratedNever();
 
-        employee.Property(e => e.FullName).HasMaxLength(100).IsRequired();
-        employee.Property(e => e.Email).HasMaxLength(254).IsRequired();
-        employee.Property(e => e.JobTitle).HasMaxLength(100).IsRequired();
-        employee.Property(e => e.Department).HasMaxLength(100).IsRequired();
+        employee.Property(e => e.FullName).HasMaxLength(EmployeeLimits.MaxTextLength).IsRequired();
+        employee.Property(e => e.Email).HasMaxLength(EmployeeLimits.MaxEmailLength).IsRequired();
+        employee.Property(e => e.JobTitle).HasMaxLength(EmployeeLimits.MaxTextLength).IsRequired();
+        employee.Property(e => e.Department).HasMaxLength(EmployeeLimits.MaxTextLength).IsRequired();
         employee.Property(e => e.BaseMonthlySalary).HasPrecision(18, 2);
         employee.Property(e => e.Status).HasConversion<string>().HasMaxLength(16);
 

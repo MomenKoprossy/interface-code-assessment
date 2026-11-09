@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using BuildingBlocks.Abstractions;
@@ -13,8 +14,6 @@ namespace Employees.Application;
 internal abstract partial class EmployeeInputValidator<T> : AbstractValidator<T>
     where T : EmployeeInput
 {
-    public const int MaxTextLength = 100;
-    public const int MaxEmailLength = 254;
     public const int MaxPayItems = 20;
     public static readonly DateOnly MinHireDate = new(1900, 1, 1);
 
@@ -22,18 +21,18 @@ internal abstract partial class EmployeeInputValidator<T> : AbstractValidator<T>
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.FullName).RequiredText("Full name", MaxTextLength);
-        RuleFor(x => x.JobTitle).RequiredText("Job title", MaxTextLength);
-        RuleFor(x => x.Department).RequiredText("Department", MaxTextLength);
+        RuleFor(x => x.FullName).RequiredText("Full name", EmployeeLimits.MaxTextLength);
+        RuleFor(x => x.JobTitle).RequiredText("Job title", EmployeeLimits.MaxTextLength);
+        RuleFor(x => x.Department).RequiredText("Department", EmployeeLimits.MaxTextLength);
 
         RuleFor(x => x.Email)
-            .RequiredText("Email", MaxEmailLength)
+            .RequiredText("Email", EmployeeLimits.MaxEmailLength)
             .Must(email => EmailFormat().IsMatch(email!.Trim())).WithMessage("Email must be a valid email address.");
 
         RuleFor(x => x.HireDate)
             .NotNull().WithMessage("Hire date is required.")
             .Must(date => date <= DateOnly.FromDateTime(clock.UtcNow)).WithMessage("Hire date cannot be in the future.")
-            .Must(date => date >= MinHireDate).WithMessage("Hire date cannot be before 1900-01-01.");
+            .Must(date => date >= MinHireDate).WithMessage($"Hire date cannot be before {MinHireDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.");
 
         RuleFor(x => x.BaseMonthlySalary).ValidMoney("Base monthly salary");
 
@@ -99,6 +98,6 @@ internal static class InputRules
     public static IRuleBuilderOptions<T, decimal?> ValidMoney<T>(this IRuleBuilder<T, decimal?> rule, string label) =>
         rule.NotNull().WithMessage($"{label} is required.")
             .GreaterThan(0m).WithMessage($"{label} must be greater than 0.")
-            .LessThanOrEqualTo(MaxAmount).WithMessage($"{label} must be at most 1,000,000.")
+            .LessThanOrEqualTo(MaxAmount).WithMessage(string.Create(CultureInfo.InvariantCulture, $"{label} must be at most {MaxAmount:N0}."))
             .Must(amount => decimal.Round(amount!.Value, 2) == amount).WithMessage($"{label} must have at most 2 decimal places.");
 }

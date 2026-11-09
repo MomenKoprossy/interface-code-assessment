@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using BuildingBlocks.Abstractions;
 using Employees.Application;
+using Employees.Contracts;
 using Employees.Domain;
 using NSubstitute;
 
