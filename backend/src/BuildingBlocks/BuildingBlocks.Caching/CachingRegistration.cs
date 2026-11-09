@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
 
-namespace BuildingBlocks.Data;
+namespace BuildingBlocks.Caching;
 
 /// <summary>Registers HybridCache (L1 in-memory by default, Redis L2 only when configured).</summary>
 public static class CachingRegistration

@@ -2,7 +2,7 @@ using BuildingBlocks.Domain;
 
 namespace BuildingBlocks.Application;
 
-/// <summary>Handles an in-process domain event (e.g. react to EntityPublished). Optional per service.</summary>
+/// <summary>Handles an in-process domain event (e.g. react to EmployeeDeactivated). Optional per service.</summary>
 public interface IDomainEventHandler<in TEvent>
     where TEvent : DomainEvent
 {
