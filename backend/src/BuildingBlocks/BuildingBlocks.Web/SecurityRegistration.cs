@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using System.Threading.RateLimiting;
 using BuildingBlocks.Abstractions;
@@ -80,6 +81,14 @@ public static class SecurityRegistration
         services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            // Header only: no body is written here, so UseStatusCodePages still renders the 429 ProblemDetails.
+            options.OnRejected = (context, _) =>
+            {
+                if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+                    context.HttpContext.Response.Headers.RetryAfter =
+                        ((int)Math.Ceiling(retryAfter.TotalSeconds)).ToString(CultureInfo.InvariantCulture);
+                return ValueTask.CompletedTask;
+            };
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                 PerClientIp(httpContext, permitLimit, window));
             options.AddPolicy(LoginRateLimitPolicy, httpContext =>

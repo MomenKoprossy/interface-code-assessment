@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
@@ -38,9 +39,12 @@ internal sealed class GlobalExceptionHandler(
             _ => mappers.Select(m => m.TryMap(exception)).FirstOrDefault(p => p is not null),
         };
 
+        // Same id the default ProblemDetails writer uses for every other error (W3C "00-…" under OpenTelemetry).
+        var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
+
         if (problemDetails is null)
         {
-            logger.LogError(exception, "Unhandled exception. TraceId={TraceId}", httpContext.TraceIdentifier);
+            logger.LogError(exception, "Unhandled exception. TraceId={TraceId}", traceId);
             problemDetails = new ProblemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,
@@ -52,7 +56,7 @@ internal sealed class GlobalExceptionHandler(
             logger.LogInformation("Request rejected with {Status}: {Title}", problemDetails.Status, problemDetails.Title);
         }
 
-        problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
+        problemDetails.Extensions["traceId"] = traceId;
         httpContext.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
 
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
