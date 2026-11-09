@@ -40,13 +40,18 @@ public static class IdentityModule
 
         auth.MapPost("/login", async (LoginCommand command, ISender sender, CancellationToken ct) =>
                 (await sender.Send(command, ct)).ToHttpResult())
+            .WithName("Login")
             .AllowAnonymous()
+            // Policy registered by the platform (SecurityRegistration): a tighter per-IP limit than the global one.
+            .RequireRateLimiting("login")
             .Produces<LoginResponse>()
             .ProducesValidationProblem()
-            .ProducesProblem(StatusCodes.Status401Unauthorized);
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests);
 
         auth.MapGet("/me", async (ISender sender, CancellationToken ct) =>
                 (await sender.Send(new GetCurrentUserQuery(), ct)).ToHttpResult())
+            .WithName("GetCurrentUser")
             .RequireAuthorization()
             .Produces<CurrentUserDto>()
             .ProducesProblem(StatusCodes.Status401Unauthorized);
