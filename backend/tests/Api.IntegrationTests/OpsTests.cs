@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using AwesomeAssertions;
 using EmployeePayroll.Api.Persistence;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -58,6 +59,18 @@ public sealed class OpsTests(ApiFactory api)
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType!.MediaType.Should().Be("text/html");
+    }
+
+    // Outside Development the docs exist only behind OpenApi:Enabled. Testing is not Development, so this isolates the flag.
+    [Theory]
+    [InlineData("/openapi/v1.json")]
+    [InlineData("/swagger/index.html")]
+    public async Task Api_docs_are_404_when_OpenApi_is_disabled(string path)
+    {
+        await using var noDocs = api.WithWebHostBuilder(b => b.UseSetting("OpenApi:Enabled", "false"));
+        using var client = noDocs.CreateClient();
+
+        (await client.GetAsync(path)).StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
     // `dotnet ef migrations add` builds the model from DesignTimeAppDbContextFactory's hard-coded module list; a module

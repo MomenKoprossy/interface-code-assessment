@@ -14,7 +14,7 @@ internal static class Arch
 
     public static Assembly Core(string module) => Load(module);
     public static Assembly Infrastructure(string module) => Load($"{module}.Infrastructure");
-    public static Assembly EmployeesContracts => Load("Employees.Contracts");
+    public static readonly string[] Contracts = ["Employees.Contracts", "Payroll.Contracts"];
 
     public static IEnumerable<Assembly> Cores => Modules.Select(Core);
 
@@ -23,7 +23,7 @@ internal static class Arch
 
     public static IEnumerable<Assembly> All =>
         Modules.SelectMany(m => new[] { Core(m), Infrastructure(m) })
-            .Append(EmployeesContracts)
+            .Concat(Contracts.Select(Load))
             .Concat(BuildingBlocks.Select(Load))
             .Append(Load(Api));
 

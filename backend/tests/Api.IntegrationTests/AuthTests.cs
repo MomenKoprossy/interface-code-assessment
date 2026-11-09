@@ -131,7 +131,11 @@ public sealed class AuthTests(ApiFactory api)
         (await client.PostAsJsonAsync("/api/auth/login", attempt)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         await (await client.PostAsJsonAsync("/api/auth/login", attempt)).ShouldBeProblemAsync(HttpStatusCode.TooManyRequests);
 
-        using var other = await api.HrClientAsync();   // other endpoints keep the global limit
+        // Same host, same client partition: other endpoints keep the global limit. The token comes from the shared
+        // host (same Jwt:Key), since this host's login budget is spent.
+        using var other = throttled.CreateClient();
+        other.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", (await api.LoginAsync(ApiFactory.HrEmail)).AccessToken);
         (await other.GetAsync("/api/employees")).StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
