@@ -12,6 +12,8 @@ React 19 + TypeScript (strict) + Vite + **hand-written SCSS**. The goal is a sim
 | `vite`, `@vitejs/plugin-react`, `typescript` (dev) | build tooling |
 | `vitest`, `@testing-library/react`, `@testing-library/user-event`, `@testing-library/jest-dom`, `jsdom` (dev) | component and unit tests |
 | `eslint` + `typescript-eslint` + `eslint-plugin-react-hooks` (dev) | static checks in CI |
+| `@types/node` (dev) | types for `process.env` in `vite.config.ts` (build-time only) |
+| `@testing-library/dom` (dev) | required peer dependency of `@testing-library/react` 16 |
 
 **Not used, on purpose:** no UI kit, no state library (React context + hooks are enough), no form library
 (the forms are small, and the validation rules live in our own tested module), no data-fetching library (a small

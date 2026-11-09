@@ -26,8 +26,8 @@
 
 | Method | Path | Auth | Body → Response |
 |---|---|---|---|
-| POST | `/api/auth/login` | anonymous | `{ email, password }` → 200 `LoginResponse`; 401 ProblemDetails on bad credentials (same message for unknown email and wrong password) |
-| GET | `/api/auth/me` | any authenticated | → 200 `CurrentUser` |
+| POST | `/api/auth/login` | anonymous | `{ email, password }` → 200 `LoginResponse`; 400 malformed input (email format, max 254; password required, max 128); 401 ProblemDetails on bad credentials (same message for unknown email and wrong password) |
+| GET | `/api/auth/me` | any authenticated | → 200 `CurrentUser`; 401 if the token's user no longer exists |
 
 ```ts
 type Role = 'HR' | 'Employee';
@@ -50,7 +50,7 @@ JWT claims: `sub` (user id), `name`, `email`, `role`, `employee_id` (Employee ro
 | DELETE | `/api/employees/{id}` | employees.write | 204 · 404 (soft delete) |
 
 List semantics: `search` is a case-insensitive substring match on full name **or** email. `department` is an exact,
-case-insensitive match. `status` is `Active` or `Inactive`. Results are ordered by full name, then id. `pageSize` is
+case-insensitive match. `status` is `Active` or `Inactive` (case-sensitive; any other value → 400 `errors.status`). Results are ordered by full name, then id. `pageSize` is
 clamped to 1..100 (default 10) and `page` is at least 1.
 
 ```ts

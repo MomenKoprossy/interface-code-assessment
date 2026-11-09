@@ -8,6 +8,7 @@ using EmployeePayroll.Api.OpenApi;
 using Identity;
 using Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Payroll;
 using Payroll.Infrastructure;
 
@@ -53,6 +54,8 @@ api.MapIdentityEndpoints();
 api.MapEmployeesEndpoints();
 api.MapPayrollEndpoints();
 
+// Fail fast on invalid configuration (JWT key, payroll policy) before touching the database.
+app.Services.GetRequiredService<IStartupValidator>().Validate();
 await app.InitializeDatabaseAsync();
 await app.RunAsync();
 
