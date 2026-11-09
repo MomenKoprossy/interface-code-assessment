@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BuildingBlocks.UnitTests.Application;
 
 /// <summary>
-/// The hand-rolled mediator (spec §6): routes a request to its single handler, wraps it in the pipeline with the
+/// The hand-rolled mediator: routes a request to its single handler, wraps it in the pipeline with the
 /// FIRST-registered behavior outermost, and <see cref="ValidationBehavior{TRequest,TResponse}"/> short-circuits
 /// with every validator's failures before the handler runs.
 /// </summary>
@@ -87,5 +87,14 @@ public class MediatorTests
         var response = await sender.Send(new Ping("ok"), TestContext.Current.CancellationToken);
 
         response.Should().Be("pong:ok");
+    }
+
+    [Fact]
+    public void AddPlatformMediator_registers_logging_then_validation_and_no_exception_logging_behavior()
+    {
+        var services = new ServiceCollection().AddPlatformMediator(typeof(MediatorTests).Assembly);
+
+        services.Where(d => d.ServiceType == typeof(IPipelineBehavior<,>)).Select(d => d.ImplementationType)
+            .Should().Equal(typeof(LoggingBehavior<,>), typeof(ValidationBehavior<,>));
     }
 }

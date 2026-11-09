@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace BuildingBlocks.Application;
 
-/// <summary>Logs handling + elapsed time for every request, correlated by trace id (spec §15).</summary>
+/// <summary>Logs handling + elapsed time for every request, correlated by trace id.</summary>
 public sealed class LoggingBehavior<TRequest, TResponse>(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull

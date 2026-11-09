@@ -25,7 +25,7 @@ public static class MessagingRegistration
     /// service's DB (committed by its <c>SaveChangesAsync</c>) and a hosted dispatcher relays them to the transport.
     /// </summary>
     /// <remarks>
-    /// Distributed tracing (§15): Rebus 8 emits the "Rebus" <c>ActivitySource</c> automatically, which
+    /// Distributed tracing: Rebus 8 emits the "Rebus" <c>ActivitySource</c> automatically, which
     /// ServiceDefaults consumes via <c>AddSource("Rebus")</c>. The older opt-in
     /// <c>Options(o =&gt; o.EnableDiagnosticSources())</c> hook does not exist in Rebus 8.9.2, so it is
     /// intentionally not called here (see final report).

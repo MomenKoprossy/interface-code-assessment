@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    BuildingBlocks.Web = AspNetCore + Security (right-sized per spec §4).
+    BuildingBlocks.Web = AspNetCore + Security.
     Web edge: ProblemDetails + global exception handler, Result->IResult mapping,
     request/response logging, AddPlatform()/UsePlatform() aggregation, JWT bearer,
     permission policy provider + [HasPermission], rate limiting, security headers, HttpCurrentUser.

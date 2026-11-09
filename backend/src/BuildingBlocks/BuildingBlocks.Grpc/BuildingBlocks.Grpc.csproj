@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    BuildingBlocks.Grpc = gRPC server + typed-client wiring helpers (spec §11):
+    BuildingBlocks.Grpc = gRPC server + typed-client wiring helpers:
     AddGrpcClient<T> bound to a logical service-discovery name + standard resilience.
-    Opt-in: only services that call each other synchronously reference this (CMS -> Attachment).
+    Opt-in: only for synchronous cross-service calls.
   -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Grpc</RootNamespace>

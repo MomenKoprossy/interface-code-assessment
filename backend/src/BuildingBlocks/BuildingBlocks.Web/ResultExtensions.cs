@@ -5,7 +5,7 @@ namespace BuildingBlocks.Web;
 
 /// <summary>
 /// Maps a railway-oriented <see cref="Result"/> to an <see cref="IResult"/> with the precise HTTP
-/// status for its <see cref="ErrorType"/> (§6). Endpoints just return <c>result.ToHttpResult()</c>.
+/// status for its <see cref="ErrorType"/>. Endpoints just return <c>result.ToHttpResult()</c>.
 /// Every failure is an RFC 7807 ProblemDetails; an <see cref="Error.Field"/> is reported under <c>errors</c>.
 /// </summary>
 public static class ResultExtensions

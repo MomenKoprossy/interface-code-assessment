@@ -1,6 +1,6 @@
 namespace BuildingBlocks.Abstractions;
 
-/// <summary>Classifies an expected failure so the web layer can map it to a precise HTTP status (§6).</summary>
+/// <summary>Classifies an expected failure so the web layer can map it to a precise HTTP status.</summary>
 public enum ErrorType { Failure, Validation, NotFound, Conflict, Forbidden, Unauthorized, Unprocessable }
 
 /// <summary>

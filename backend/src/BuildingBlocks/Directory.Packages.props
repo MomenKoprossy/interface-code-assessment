@@ -1,11 +1,17 @@
 <Project>
 
   <!--
-    Versions for the GROWTH-PATH building blocks only (Messaging, Grpc, Storage) and their tests.
+    Versions for the GROWTH-PATH building blocks only (Caching, Messaging, Grpc, Storage) and their tests.
     They build in BuildingBlocks.slnx but are not referenced by the app (EmployeePayroll.slnx), so their
     packages stay out of the app's root Directory.Packages.props. Imports the root for everything else.
   -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <ItemGroup Label="Caching (HybridCache, Redis L2 when configured)">
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.6.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.8" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
+  </ItemGroup>
 
   <ItemGroup Label="Messaging (Rebus over RabbitMQ, MIT)">
     <PackageVersion Include="Rebus" Version="8.9.2" />

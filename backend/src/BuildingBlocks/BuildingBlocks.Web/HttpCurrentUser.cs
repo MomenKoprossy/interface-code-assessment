@@ -30,7 +30,7 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) 
         User?.FindAll("permission").Select(c => c.Value).ToArray() ?? [];
 
     public bool HasPermission(string permission) =>
-        Permissions.Contains(permission) || Permissions.Contains("*");
+        Permissions.Contains(permission);
 
     public string? FindClaim(string claimType) => User?.FindFirstValue(claimType);
 }

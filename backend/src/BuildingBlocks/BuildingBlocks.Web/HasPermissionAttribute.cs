@@ -4,7 +4,7 @@ namespace BuildingBlocks.Web;
 
 /// <summary>
 /// Declarative permission gate. Encodes the permission into the policy NAME (<c>perm:{permission}</c>);
-/// <see cref="PermissionPolicyProvider"/> builds the matching policy on demand (§13.2).
+/// <see cref="PermissionPolicyProvider"/> builds the matching policy on demand.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 public sealed class HasPermissionAttribute : AuthorizeAttribute

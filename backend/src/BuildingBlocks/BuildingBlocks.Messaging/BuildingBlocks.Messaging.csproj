@@ -2,8 +2,7 @@
 
   <!--
     BuildingBlocks.Messaging = IEventBus (publish/subscribe integration events) over RabbitMQ
-    via Rebus. Opt-in: only services doing async reference this (Attachment publishes,
-    CMS subscribes). Rebus.OpenTelemetry enables producer/consumer trace spans (§15).
+    via Rebus. Opt-in: only for asynchronous cross-service events. Rebus.OpenTelemetry enables producer/consumer trace spans.
   -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Messaging</RootNamespace>

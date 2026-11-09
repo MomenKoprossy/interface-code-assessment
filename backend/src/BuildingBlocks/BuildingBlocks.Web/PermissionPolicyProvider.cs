@@ -5,7 +5,7 @@ namespace BuildingBlocks.Web;
 
 /// <summary>
 /// Builds an authorization policy on demand for any policy name starting with <c>perm:</c>, wrapping a
-/// <see cref="PermissionRequirement"/>. Non-permission policies fall back to the default provider (§13.2).
+/// <see cref="PermissionRequirement"/>. Non-permission policies fall back to the default provider.
 /// </summary>
 internal sealed class PermissionPolicyProvider(IOptions<AuthorizationOptions> options) : IAuthorizationPolicyProvider
 {

@@ -2,7 +2,7 @@ namespace BuildingBlocks.Storage;
 
 /// <summary>
 /// Bound from configuration section <c>Storage</c>. <c>Storage:Provider</c> selects the
-/// implementation: <c>"Local"</c> (disk) or <c>"S3"</c> (S3-compatible). See §4.3.
+/// implementation: <c>"Local"</c> (disk) or <c>"S3"</c> (S3-compatible).
 /// </summary>
 public sealed class FileStorageOptions
 {

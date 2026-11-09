@@ -1,12 +1,13 @@
 <Solution>
   <!--
-    All six vendored building blocks + their unit tests. The app (../../EmployeePayroll.slnx) references only
-    Core, Data and Web; Messaging, Grpc and Storage are the growth path (see .claude/docs/scalability.md) and are
+    All seven vendored building blocks + their unit tests. The app (../../EmployeePayroll.slnx) references only
+    Core, Data and Web; Caching, Messaging, Grpc and Storage are the growth path (see .claude/docs/scalability.md) and are
     built + tested here (and in CI) so they stay healthy without entering the app's dependency graph.
   -->
   <Project Path="BuildingBlocks.Core/BuildingBlocks.Core.csproj" />
   <Project Path="BuildingBlocks.Data/BuildingBlocks.Data.csproj" />
   <Project Path="BuildingBlocks.Web/BuildingBlocks.Web.csproj" />
+  <Project Path="BuildingBlocks.Caching/BuildingBlocks.Caching.csproj" />
   <Project Path="BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj" />
   <Project Path="BuildingBlocks.Grpc/BuildingBlocks.Grpc.csproj" />
   <Project Path="BuildingBlocks.Storage/BuildingBlocks.Storage.csproj" />
