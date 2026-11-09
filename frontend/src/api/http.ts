@@ -3,6 +3,7 @@ import { expireSession, getAccessToken } from '../features/auth/session';
 
 // Relative base: the Vite dev proxy and nginx (Docker) both forward /api to the backend.
 const BASE_URL = '/api';
+export const LOGIN_PATH = '/auth/login';
 
 type Query = Record<string, string | number | undefined>;
 
@@ -54,7 +55,8 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   const body = await readBody(response);
   if (response.ok) return body as T;
 
-  // A 401 on an authenticated call means the token is no longer valid; a 401 on login is just bad credentials.
-  if (response.status === 401 && token) expireSession();
+  // Any 401 except login ends the session: the token was rejected, or it already expired client-side and wasn't sent.
+  // A 401 on login is just bad credentials.
+  if (response.status === 401 && path !== LOGIN_PATH) expireSession();
   throw toApiError(response.status, body);
 }

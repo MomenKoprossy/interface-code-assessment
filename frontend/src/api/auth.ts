@@ -1,5 +1,5 @@
-import { request } from './http';
+import { LOGIN_PATH, request } from './http';
 import type { LoginResponse } from './types';
 
 export const login = (email: string, password: string) =>
-  request<LoginResponse>('/auth/login', { method: 'POST', body: { email, password } });
+  request<LoginResponse>(LOGIN_PATH, { method: 'POST', body: { email, password } });

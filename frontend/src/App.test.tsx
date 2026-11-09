@@ -98,6 +98,13 @@ describe('login', () => {
     expect(authApi.login).toHaveBeenCalledWith('hr@example.com', 'secret');
   });
 
+  it('titles the page and caps the fields at the server limits', () => {
+    renderApp(<App />, '/login');
+    expect(document.title).toBe('Sign in · Employee Payroll');
+    expect(screen.getByLabelText(/email/i)).toHaveAttribute('maxLength', '254');
+    expect(screen.getByLabelText(/password/i)).toHaveAttribute('maxLength', '128');
+  });
+
   it('shows the server message on bad credentials', async () => {
     vi.mocked(authApi.login).mockRejectedValue(new ApiError({ status: 401, title: 'Invalid email or password.' }));
     const user = userEvent.setup();
