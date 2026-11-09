@@ -58,5 +58,5 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   // Any 401 except login ends the session: the token was rejected, or it already expired client-side and wasn't sent.
   // A 401 on login is just bad credentials.
   if (response.status === 401 && path !== LOGIN_PATH) expireSession();
-  throw toApiError(response.status, body);
+  throw toApiError(response.status, body, response.headers.get('Retry-After'));
 }

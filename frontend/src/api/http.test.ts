@@ -3,8 +3,11 @@ import { saveSession, SESSION_EXPIRED_EVENT } from '../features/auth/session';
 import { request } from './http';
 import { ApiError, errorMessage, isStatus } from './problem';
 
-function jsonResponse(status: number, body: unknown, contentType = 'application/json'): Response {
-  return new Response(body === undefined ? null : JSON.stringify(body), { status, headers: { 'Content-Type': contentType } });
+function jsonResponse(status: number, body: unknown, contentType = 'application/json', headers: Record<string, string> = {}): Response {
+  return new Response(body === undefined ? null : JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': contentType, ...headers },
+  });
 }
 
 async function capture(promise: Promise<unknown>): Promise<ApiError> {
@@ -167,5 +170,24 @@ describe('request', () => {
     window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
     expect(errorMessage(error)).toBe('Invalid email or password.');
     expect(onExpired).not.toHaveBeenCalled();
+  });
+
+  it('shows the friendly rate-limit message on a login 429 instead of the bare server title', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(429, { title: 'Too Many Requests', status: 429 }));
+
+    const error = await capture(request('/auth/login', { method: 'POST', body: {} }));
+
+    expect(isStatus(error, 429)).toBe(true);
+    expect(errorMessage(error)).toBe('Too many requests. Please wait a moment and try again.');
+  });
+
+  it('includes the Retry-After wait in the 429 message', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse(429, { title: 'Too Many Requests', status: 429 }, 'application/problem+json', { 'Retry-After': '60' }),
+    );
+
+    const error = await capture(request('/auth/login', { method: 'POST', body: {} }));
+
+    expect(errorMessage(error)).toBe('Too many requests. Try again in 60 seconds.');
   });
 });
