@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    BuildingBlocks.Grpc = gRPC server + typed-client wiring helpers (spec §11):
+    AddGrpcClient<T> bound to a logical service-discovery name + standard resilience.
+    Opt-in: only services that call each other synchronously reference this (CMS -> Attachment).
+  -->
+  <PropertyGroup>
+    <RootNamespace>BuildingBlocks.Grpc</RootNamespace>
+    <Description>gRPC building block: AddPlatformGrpcServer plus typed-client wiring bound to a service-discovery logical name with standard resilience.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" />
+    <PackageReference Include="Grpc.Net.ClientFactory" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+  </ItemGroup>
+
+</Project>

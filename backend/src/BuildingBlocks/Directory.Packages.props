@@ -1,0 +1,32 @@
+<Project>
+
+  <!--
+    Versions for the GROWTH-PATH building blocks only (Messaging, Grpc, Storage) and their tests.
+    They build in BuildingBlocks.slnx but are not referenced by the app (EmployeePayroll.slnx), so their
+    packages stay out of the app's root Directory.Packages.props. Imports the root for everything else.
+  -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Packages.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <ItemGroup Label="Messaging (Rebus over RabbitMQ, MIT)">
+    <PackageVersion Include="Rebus" Version="8.9.2" />
+    <PackageVersion Include="Rebus.RabbitMq" Version="10.1.1" />
+    <PackageVersion Include="Rebus.ServiceProvider" Version="10.7.2" />
+    <PackageVersion Include="Rebus.OpenTelemetry" Version="1.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="gRPC">
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.80.0" />
+    <PackageVersion Include="Grpc.Net.ClientFactory" Version="2.80.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Storage (S3 / MinIO / Spaces)">
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.24" />
+  </ItemGroup>
+
+  <ItemGroup Label="BuildingBlocks.UnitTests (outbox tests use an in-memory relational provider)">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+    <!-- EF Sqlite 10.0.8 pulls SQLitePCLRaw.lib.e_sqlite3 2.1.11 (NU1903, GHSA-2m69-gcr7-jv3q); pin the patched 2.1.x. -->
+    <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.14" />
+  </ItemGroup>
+
+</Project>

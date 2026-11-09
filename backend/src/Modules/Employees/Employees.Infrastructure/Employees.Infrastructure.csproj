@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Employees module ADAPTERS: EF Core mappings + repositories, minimal-API endpoints, options binding, seeding,
+       and the module's composition (AddEmployeesModule / MapEmployeesEndpoints). -->
+  <PropertyGroup>
+    <RootNamespace>Employees.Infrastructure</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Employees\Employees.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Data\BuildingBlocks.Data.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Web\BuildingBlocks.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Employees.UnitTests" />
+    <InternalsVisibleTo Include="Api.IntegrationTests" />
+  </ItemGroup>
+
+</Project>

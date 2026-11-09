@@ -1,0 +1,39 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+*.trx
+coverage*/
+
+# Node / frontend
+node_modules/
+dist/
+coverage/
+*.local
+
+# Secrets: never commit real env files (.env.example is the documented template)
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Thumbs.db
+.DS_Store
+
+# Claude Code: local-only state (worktrees of parallel agents, session watchdog, local settings)
+.claude/worktrees/
+.claude/settings.local.json
+.claude/watchdog-continue.ps1
+.claude/watchdog.log
+.claude/pipeline-heartbeat.json
+
+# The assessment brief is the company's document; it stays out of the repository
+Interface_Code_Assessment_2026.pdf
+
+# Claude Code scheduler lock (session-local)
+.claude/scheduled_tasks.lock

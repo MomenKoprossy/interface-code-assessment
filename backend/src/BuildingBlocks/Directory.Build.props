@@ -1,0 +1,15 @@
+<Project>
+
+  <!--
+    Build settings for the vendored BuildingBlocks.* libraries (from the DotnetPlayGround template).
+    In the template these are packed to a local NuGet feed; here they are consumed as SOURCE via
+    ProjectReference so every line that runs is readable in the repo (see .claude/docs/adr ADR-002).
+    Imports the backend root props (net10, nullable, implicit usings, analyzers).
+  -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

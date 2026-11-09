@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The Employees module's public API for other modules: interfaces + DTO records only. -->
+  <PropertyGroup>
+    <RootNamespace>Employees.Contracts</RootNamespace>
+  </PropertyGroup>
+
+</Project>

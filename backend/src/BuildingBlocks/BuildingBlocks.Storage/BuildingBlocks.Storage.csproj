@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    BuildingBlocks.Storage = IFileStorage with Local + S3-compatible providers, selected by
+    config (spec §4.3). S3 provider works with AWS S3, MinIO, DO Spaces via ServiceUrl +
+    ForcePathStyle. Only the Attachment service references this.
+  -->
+  <PropertyGroup>
+    <RootNamespace>BuildingBlocks.Storage</RootNamespace>
+    <Description>File-storage building block: IFileStorage with Local and S3-compatible (AWS S3 / MinIO / DigitalOcean Spaces) providers selected by configuration.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

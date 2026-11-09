@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    BuildingBlocks.Messaging = IEventBus (publish/subscribe integration events) over RabbitMQ
+    via Rebus. Opt-in: only services doing async reference this (Attachment publishes,
+    CMS subscribes). Rebus.OpenTelemetry enables producer/consumer trace spans (§15).
+  -->
+  <PropertyGroup>
+    <RootNamespace>BuildingBlocks.Messaging</RootNamespace>
+    <Description>Messaging building block: IEventBus over RabbitMQ via Rebus for publishing/subscribing integration events, with OpenTelemetry producer/consumer spans. Registers a no-op bus when RabbitMQ is absent.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rebus" />
+    <PackageReference Include="Rebus.RabbitMq" />
+    <PackageReference Include="Rebus.ServiceProvider" />
+    <PackageReference Include="Rebus.OpenTelemetry" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <!-- Transactional outbox (opt-in): staged on the service's DbContext; provider-agnostic. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="BuildingBlocks.UnitTests" />
+  </ItemGroup>
+
+</Project>

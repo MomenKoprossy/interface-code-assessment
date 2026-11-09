@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    BuildingBlocks.Data = Persistence.Ef + Caching (right-sized per spec §4).
+    Provider-agnostic EF base (DbContext base, audit/soft-delete interceptors, EfRepository,
+    EfUnitOfWork, paging) + HybridCache wrapper (Redis L2 only when configured).
+    The concrete DB provider (Npgsql) is chosen in each SERVICE, not here.
+  -->
+  <PropertyGroup>
+    <RootNamespace>BuildingBlocks.Data</RootNamespace>
+    <Description>EF Core persistence building block: AppDbContextBase with audit/soft-delete/domain-event interception, EfRepository, EfUnitOfWork, paging, and a HybridCache wrapper (Redis L2 when configured). DB-provider-agnostic.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+  </ItemGroup>
+
+</Project>
