@@ -5,7 +5,7 @@ namespace Identity.Application;
 
 public sealed record GetCurrentUserQuery : IQuery<Result<CurrentUserDto>>;
 
-internal sealed class GetCurrentUserQueryHandler(ICurrentUser currentUser, IUserRepository users)
+internal sealed class GetCurrentUserHandler(ICurrentUser currentUser, IUserRepository users)
     : IRequestHandler<GetCurrentUserQuery, Result<CurrentUserDto>>
 {
     public static readonly Error NotSignedIn = Error.Unauthorized("You are not signed in.");

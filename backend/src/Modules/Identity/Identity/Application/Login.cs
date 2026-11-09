@@ -10,12 +10,12 @@ public sealed record LoginCommand(string Email, string Password) : ICommand<Resu
 /// <summary>The contract's <c>LoginResponse</c>.</summary>
 public sealed record LoginResponse(string AccessToken, DateTime ExpiresAtUtc, CurrentUserDto User);
 
-internal sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
+internal sealed class LoginValidator : AbstractValidator<LoginCommand>
 {
     public const int EmailMaxLength = 254;
     public const int PasswordMaxLength = 128;
 
-    public LoginCommandValidator()
+    public LoginValidator()
     {
         RuleFor(c => c.Email)
             .Cascade(CascadeMode.Stop)
@@ -30,7 +30,7 @@ internal sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
     }
 }
 
-internal sealed class LoginCommandHandler(IUserRepository users, IPasswordHasher passwordHasher, ITokenIssuer tokenIssuer)
+internal sealed class LoginHandler(IUserRepository users, IPasswordHasher passwordHasher, ITokenIssuer tokenIssuer)
     : IRequestHandler<LoginCommand, Result<LoginResponse>>
 {
     // One message for unknown email and wrong password, so the response doesn't reveal which accounts exist.

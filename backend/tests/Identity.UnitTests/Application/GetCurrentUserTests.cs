@@ -12,7 +12,7 @@ public class GetCurrentUserTests
     private readonly IUserRepository _users = Substitute.For<IUserRepository>();
 
     private ValueTask<Result<CurrentUserDto>> Handle() =>
-        new GetCurrentUserQueryHandler(_currentUser, _users).Handle(new GetCurrentUserQuery(), CancellationToken.None);
+        new GetCurrentUserHandler(_currentUser, _users).Handle(new GetCurrentUserQuery(), CancellationToken.None);
 
     [Fact]
     public async Task Returns_the_signed_in_user_with_permissions()

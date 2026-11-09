@@ -3,9 +3,9 @@ using Identity.Application;
 
 namespace Identity.UnitTests.Application;
 
-public class LoginCommandValidatorTests
+public class LoginValidatorTests
 {
-    private static readonly LoginCommandValidator Validator = new();
+    private static readonly LoginValidator Validator = new();
 
     private static IEnumerable<string> ErrorsFor(string email, string password, string property) =>
         Validator.Validate(new LoginCommand(email, password)).Errors
