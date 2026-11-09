@@ -1,0 +1,117 @@
+@use '../tokens' as *;
+@use '../mixins' as *;
+
+.data-table {
+  @include card;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+
+  th,
+  td {
+    padding: $space-2 + $space-1 $space-3;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: $color-surface-alt;
+    border-bottom: 1px solid $color-border;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background: $color-surface-alt;
+  }
+
+  &__number {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__primary {
+    display: block;
+    font-weight: 600;
+  }
+
+  &__secondary {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    overflow-wrap: anywhere;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: $space-1;
+  }
+
+  &--compact {
+    th,
+    td {
+      padding: $space-2 $space-2 + $space-1;
+    }
+  }
+
+  // Narrow screens: every row becomes a card, each cell labelled from data-label.
+  @include below($breakpoint-sm) {
+    border: 0;
+    background: transparent;
+
+    thead {
+      @include visually-hidden;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      @include card;
+      margin-bottom: $space-2;
+      padding: $space-2 0;
+    }
+
+    tbody tr:nth-child(even) {
+      background: $color-surface;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      gap: $space-3;
+      padding: $space-1 $space-3;
+      text-align: right;
+
+      // An unlabelled cell (the name) is the card's heading rather than a label/value pair.
+      &:not([data-label], .data-table__actions) {
+        display: block;
+        text-align: left;
+      }
+
+      &[data-label]::before {
+        content: attr(data-label);
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: $color-text-muted;
+        text-align: left;
+      }
+    }
+
+    .data-table__actions {
+      justify-content: flex-start;
+      padding-top: $space-2;
+    }
+  }
+}
+
+.table-scroll {
+  overflow-x: auto;
+}

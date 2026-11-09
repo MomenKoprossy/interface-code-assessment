@@ -1,0 +1,110 @@
+@use '../tokens' as *;
+@use '../mixins' as *;
+
+.payslip-toolbar {
+  display: flex;
+  align-items: center;
+  gap: $space-2 + $space-1;
+  padding: $space-2 + $space-1 $space-3;
+
+  &__month {
+    width: auto;
+  }
+}
+
+.payslip {
+  padding: $space-4;
+
+  > * + * {
+    margin-top: $space-4;
+  }
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $space-2;
+  }
+
+  &__name {
+    font-size: $font-size-lg;
+  }
+
+  &__meta,
+  &__footnote {
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+  }
+
+  &__month {
+    font-weight: 600;
+    color: $color-accent-hover;
+  }
+
+  &__subtitle {
+    font-size: $font-size;
+    margin-bottom: $space-2;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: $space-2 0;
+      border-bottom: 1px solid $color-border;
+      vertical-align: top;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 400;
+    }
+
+    td {
+      text-align: right;
+      white-space: nowrap;
+      padding-left: $space-3;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__section th {
+    padding-top: $space-4;
+    font-size: $font-size-sm;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $color-text-muted;
+  }
+
+  &__note {
+    display: block;
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  &__total {
+    th,
+    td {
+      font-weight: 600 !important;
+    }
+  }
+
+  &__net {
+    th,
+    td {
+      padding-top: $space-3 !important;
+      border-bottom: 0 !important;
+      font-size: $font-size-lg;
+      font-weight: 700 !important;
+      color: $color-accent-hover;
+    }
+  }
+
+  @include below($breakpoint-sm) {
+    padding: $space-3;
+  }
+}
