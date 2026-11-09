@@ -57,6 +57,8 @@ jobs:
       - name: Create .env
         run: |
           cp .env.example .env
-          sed -i             -e "s|^JWT_KEY=$|JWT_KEY=$(openssl rand -base64 48)|"             -e "s|^POSTGRES_PASSWORD=$|POSTGRES_PASSWORD=$(openssl rand -hex 16)|"             -e "s|^DEMO_PASSWORD=$|DEMO_PASSWORD=$(openssl rand -hex 16)|"             .env
+          sed -i "s|^JWT_KEY=$|JWT_KEY=$(openssl rand -base64 48)|" .env
+          sed -i "s|^POSTGRES_PASSWORD=$|POSTGRES_PASSWORD=$(openssl rand -hex 16)|" .env
+          sed -i "s|^DEMO_PASSWORD=$|DEMO_PASSWORD=$(openssl rand -hex 16)|" .env
       - run: docker compose config --quiet
       - run: docker compose build
