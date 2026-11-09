@@ -36,7 +36,7 @@ template and are vendored here as readable source.
 | Project | Contains | May reference | Must NOT reference |
 |---|---|---|---|
 | `<Module>` (core) | Domain (entities, value objects, domain rules) + Application (commands/queries, handlers, FluentValidation validators, **ports** = interfaces it needs) | `BuildingBlocks.Core`, other modules' `*.Contracts` | EF Core, ASP.NET Core, Npgsql, any `*.Infrastructure`, other modules' core |
-| `<Module>.Contracts` | The module's public API for other modules: interfaces + DTO records only | `BuildingBlocks.Core` (Result) | everything else |
+| `<Module>.Contracts` | The module's public API for other modules: interfaces, DTO records, the domain events other modules may react to, and permission/claim names | `BuildingBlocks.Core` (Result, DomainEvent) | everything else |
 | `<Module>.Infrastructure` | Adapters: EF Core entity configurations + repository implementations, minimal-API endpoints, options binding, seeding, the module's `Add<Module>Module()` / `Map<Module>Endpoints()` | its core, `BuildingBlocks.Data`, `BuildingBlocks.Web` | other modules' core or infrastructure |
 | `Api` | Composition root only: wires modules, DbContext, OpenAPI, pipeline. No business logic. | everything | — |
 
@@ -52,7 +52,7 @@ its EF configuration sat in the `Domain` namespace. This build fixes that.)
 
 ```
 HTTP → endpoint (Infrastructure, 3 lines: bind → ISender.Send → result.ToHttpResult())
-     → mediator pipeline (BuildingBlocks.Core): Logging → UnhandledException → Validation (FluentValidation)
+     → mediator pipeline (BuildingBlocks.Core): Logging → Validation (FluentValidation)
      → handler (module core): orchestrates domain + ports, returns Result / Result<T>
      → ports implemented in Infrastructure (EF repository, options)
      ← Result mapped to HTTP by BuildingBlocks.Web: 200/201/204, or RFC 7807 ProblemDetails 400/401/403/404/409/422
@@ -116,4 +116,4 @@ money formatting and API error mapping live in plain TS modules, which the tests
 |---|---|---|
 | Reviewer / prod-like | `docker compose up --build` | postgres + api (container) + web (nginx serving the built SPA, proxying `/api`) |
 | Dev, orchestrated | `dotnet run --project backend/src/AppHost` | Aspire: postgres container + api + Vite dev server + Aspire dashboard (traces/logs) |
-| Dev, manual | `dotnet run --project backend/src/Api` + `npm run dev` in frontend | needs a Postgres connection string |
+| Dev, manual | `dotnet run --project backend/src/Api` + `npm run dev` in frontend | needs `ConnectionStrings__appdb`, `Jwt__Key` (and `Seed__DemoPassword` for demo logins) |

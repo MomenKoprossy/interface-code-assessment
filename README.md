@@ -26,6 +26,7 @@ Open **http://localhost:8080**. Swagger UI is at http://localhost:8080/swagger.
 | `sara.ahmed@acme.test`, `omar.hassan@acme.test` | Employee | only their own payslip |
 
 Password for all three: the `DEMO_PASSWORD` you put in `.env`. The database is seeded with about 15 employees on first start.
+Changed `.env` after the first start? Run `docker compose down -v` to recreate and reseed the database.
 
 ### Development
 
@@ -33,7 +34,7 @@ Password for all three: the `DEMO_PASSWORD` you put in `.env`. The database is s
 dotnet run --project backend/src/AppHost       # Aspire: Postgres + API + Vite dev server + dashboard (logs/traces)
 ```
 
-or run the pieces yourself: `dotnet run --project backend/src/Api` (needs `ConnectionStrings__appdb` and `Jwt__Key`) and
+or run the pieces yourself: `dotnet run --project backend/src/Api` (needs `ConnectionStrings__appdb`, `Jwt__Key` and, for the demo logins, `Seed__DemoPassword`) and
 `cd frontend && npm ci && npm run dev`.
 
 ### Tests
@@ -61,12 +62,13 @@ frontend (React/TS/SCSS) ──/api──▶ Api host (composition root only)
   cache. The modules keep service-grade boundaries anyway: other modules can only see a module's `Contracts`, each
   module owns its schema, and NetArchTest rules fail the build if a module core references EF Core or ASP.NET.
 - **Clean/hexagonal inside each module** (ADR-003). The `core` project (domain + use cases + ports) references only
-  `BuildingBlocks.Core`, so business rules can't reach the framework, the database or HTTP. Adapters (EF, endpoints)
+  `BuildingBlocks.Core` and other modules' `Contracts`, so business rules can't reach the framework, the database or HTTP. Adapters (EF, endpoints)
   live in `Infrastructure`. The `Api` project only composes.
-- **Request flow**: thin endpoint → mediator pipeline (logging → exception logging → FluentValidation) → handler
+- **Request flow**: thin endpoint → mediator pipeline (logging → FluentValidation) → handler
   returning `Result` → mapped to HTTP status / RFC 7807 ProblemDetails. One global exception handler, no try/catch in handlers.
 - **Payroll** is a pure, ordered pipeline of rules (gross → social insurance → progressive tax → other deductions)
-  driven by validated configuration (ADR-006). A new deduction type is one class.
+  driven by validated configuration (ADR-006). A new post-tax deduction type is one rule class plus one registration line (a unit test proves it);
+  a pre-tax deduction also needs a draft/contract field.
 - **Money** is `decimal` / `numeric(18,2)`. Every payslip line is rounded to 2dp half away from zero, and totals are sums of
   rounded lines, so a payslip always adds up to the cent (ADR-007).
 - **Auth**: JWT with roles and permission claims, enforced server-side. An Employee can read only their own payslip (ADR-008).
@@ -96,6 +98,10 @@ payroll spec: [`.claude/docs/payroll-rules.md`](.claude/docs/payroll-rules.md) �
   server-held JWT, refresh tokens).
 - Search uses `ILIKE`. Next: a `pg_trgm` index for large tables. Pagination is offset-based.
 - No proration or mid-month salary changes.
+- No optimistic concurrency: two HR users editing the same employee is last-write-wins. Next: Postgres `xmin` as a
+  concurrency token, a version on `EmployeeDetails`/`PUT`, and 409 on conflict.
+- Deleting an employee is not announced to other modules (only Active → Inactive raises `EmployeeDeactivated`). Next:
+  an `EmployeeRemoved` event in `Employees.Contracts` when a module needs it.
 - See [`.claude/docs/scalability.md`](.claude/docs/scalability.md) for how messaging/outbox, gRPC and service
   extraction plug in.
 

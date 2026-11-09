@@ -35,11 +35,12 @@ with zero runtime footprint. Changes to blocks done for this app (below) are rec
 **Context.** The brief requires business rules separate from framework, DB and HTTP. Folder conventions don't stop
 an accidental `using Microsoft.EntityFrameworkCore`.
 
-**Decision.** `<Module>` (domain + application, references only BuildingBlocks.Core), `<Module>.Contracts` (the public
+**Decision.** `<Module>` (domain + application, references only BuildingBlocks.Core and other modules' Contracts), `<Module>.Contracts` (the public
 interface for other modules), and `<Module>.Infrastructure` (EF + HTTP adapters). NetArchTest rules guard the edges.
 
-**Consequences.** More projects (8 module projects), but purity is enforced by the compiler and tests. Unit tests reference
-only the core project, so they can't touch a database.
+**Consequences.** More projects (3 per module plus a small `Payroll.Contracts`), but purity is enforced by the compiler and
+tests. Domain and application unit tests reference only the core. Adapter tests (JWT issuing, password hashing, options
+validation, seeding) also reference Infrastructure, but they substitute every port and never open a database connection.
 
 ## ADR-004: Single AppDbContext, schema per module
 
