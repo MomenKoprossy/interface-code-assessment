@@ -2,6 +2,12 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using AwesomeAssertions;
+using EmployeePayroll.Api.Persistence;
+using Employees.Domain;
+using Employees.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.IntegrationTests;
 
@@ -106,17 +112,6 @@ public sealed class EmployeesCrudTests(ApiFactory api)
     }
 
     [Fact]
-    public async Task Malformed_json_body_is_rejected_with_400()
-    {
-        using var hr = await api.HrClientAsync();
-
-        var response = await hr.PostAsync("/api/employees",
-            new StringContent("{ this is not json", Encoding.UTF8, "application/json"));
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    [Fact]
     public async Task Binding_failures_are_400_problem_details()
     {
         using var hr = await api.HrClientAsync();
@@ -131,8 +126,6 @@ public sealed class EmployeesCrudTests(ApiFactory api)
 
 public sealed class EmployeeValidationTests(ApiFactory api)
 {
-    private static readonly DateOnly TodayUtc = DateOnly.FromDateTime(DateTime.UtcNow);
-
     public static TheoryData<string, EmployeeInputBody, string> InvalidInputs()
     {
         var valid = EmployeeFactory.ValidInput();
@@ -142,7 +135,7 @@ public sealed class EmployeeValidationTests(ApiFactory api)
             { "fullName blank", valid with { FullName = "   " }, "fullName" },
             { "email without domain dot", valid with { Email = "someone@acme" }, "email" },
             { "email with a space", valid with { Email = "some one@acme.test" }, "email" },
-            { "hireDate tomorrow (UTC)", valid with { HireDate = TodayUtc.AddDays(1) }, "hireDate" },
+            { "hireDate tomorrow (UTC)", valid with { HireDate = ApiFactory.Today.AddDays(1) }, "hireDate" },
             { "hireDate before 1900", valid with { HireDate = new DateOnly(1899, 12, 31) }, "hireDate" },
             { "salary 0", valid with { BaseMonthlySalary = 0m }, "baseMonthlySalary" },
             { "salary 3 decimals", valid with { BaseMonthlySalary = 1000.123m }, "baseMonthlySalary" },
@@ -174,14 +167,14 @@ public sealed class EmployeeValidationTests(ApiFactory api)
     public async Task Boundary_values_are_accepted()
     {
         using var hr = await api.HrClientAsync();
-        var input = EmployeeFactory.ValidInput(fullName: new string('a', 100), salary: 0.01m, hireDate: TodayUtc,
+        var input = EmployeeFactory.ValidInput(fullName: new string('a', 100), salary: 0.01m, hireDate: ApiFactory.Today,
             allowances: [new(new string('n', 50), 1_000_000m)]);
 
         var created = await EmployeeFactory.CreateAsync(hr, input);
 
         created.FullName.Should().HaveLength(100);
         created.BaseMonthlySalary.Should().Be(0.01m);
-        created.HireDate.Should().Be(TodayUtc);
+        created.HireDate.Should().Be(ApiFactory.Today);
     }
 
     [Fact]
@@ -271,5 +264,28 @@ public sealed class EmailUniquenessTests(ApiFactory api)
 
         reused.Id.Should().NotBe(deleted.Id);
         reused.Email.Should().Be(deleted.Email);
+    }
+
+    // Every API-level duplicate hits the handler's pre-check first, so this bypasses it to pin the race backstop:
+    // the real constraint name Postgres reports and the way Npgsql wraps the violation.
+    [Fact]
+    public async Task Unique_index_violation_maps_to_409_with_email_error()
+    {
+        using var hr = await api.HrClientAsync();
+        var first = await EmployeeFactory.CreateAsync(hr, EmployeeFactory.ValidInput());
+        using var scope = api.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Add(Employee.Create(new EmployeeData(
+            "Racing Duplicate", first.Email, "Engineer", "Engineering", new DateOnly(2020, 1, 1), 1000m,
+            EmployeeStatus.Active, [], [])));
+
+        var thrown = await FluentActions.Awaiting(() => db.SaveChangesAsync()).Should().ThrowAsync<DbUpdateException>();
+
+        var mapper = new UniqueEmailViolationMapper();
+        var problem = mapper.TryMap(thrown.Which);
+        problem.Should().NotBeNull();
+        problem!.Status.Should().Be(StatusCodes.Status409Conflict);
+        problem.Extensions["errors"].Should().BeOfType<Dictionary<string, string[]>>().Which.Should().ContainKey("email");
+        mapper.TryMap(new DbUpdateException("x", new InvalidOperationException())).Should().BeNull();
     }
 }

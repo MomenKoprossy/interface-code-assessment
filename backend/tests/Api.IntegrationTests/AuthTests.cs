@@ -2,6 +2,9 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using AwesomeAssertions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.IntegrationTests;
 
@@ -122,13 +125,17 @@ public sealed class AuthorizationTests(ApiFactory api)
     public async Task No_token_on_employees_is_401()
     {
         using var client = api.CreateClient();
+        var id = Guid.NewGuid();
 
         (await client.GetAsync("/api/employees")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await client.GetAsync($"/api/employees/{id}")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         (await client.PostAsJsonAsync("/api/employees", EmployeeFactory.ValidInput())).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await client.PutAsJsonAsync($"/api/employees/{id}", EmployeeFactory.ValidInput())).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await client.DeleteAsync($"/api/employees/{id}")).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
-    public async Task Employee_token_is_403_on_list_get_and_create_employees()
+    public async Task Employee_token_is_403_on_every_employees_endpoint()
     {
         using var sara = await api.SaraClientAsync();
         var ownId = (await api.LoginAsync(ApiFactory.SaraEmail)).User.EmployeeId;
@@ -137,6 +144,7 @@ public sealed class AuthorizationTests(ApiFactory api)
         (await sara.GetAsync($"/api/employees/{ownId}")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await sara.GetAsync("/api/employees/departments")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await sara.PostAsJsonAsync("/api/employees", EmployeeFactory.ValidInput())).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await sara.PutAsJsonAsync($"/api/employees/{ownId}", EmployeeFactory.ValidInput())).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await sara.DeleteAsync($"/api/employees/{ownId}")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -150,8 +158,8 @@ public sealed class AuthorizationTests(ApiFactory api)
         page.TotalCount.Should().BeGreaterThanOrEqualTo(15, "the seeder adds 15 employees");
     }
 
-    // The contract says every non-2xx is ProblemDetails, but 401/403 produced by the authentication/authorization
-    // middleware (not by a handler) are written by the JWT challenge/forbid with an empty body.
+    // Middleware-generated 401/403 (JWT challenge/forbid) carry no body by default; UseStatusCodePages in UsePlatform
+    // turns them into ProblemDetails, as the contract requires.
     [Fact]
     public async Task Middleware_401_and_403_are_problem_details()
     {
@@ -160,5 +168,23 @@ public sealed class AuthorizationTests(ApiFactory api)
 
         using var sara = await api.SaraClientAsync();
         await (await sara.GetAsync("/api/employees")).ShouldBeProblemAsync(HttpStatusCode.Forbidden);
+    }
+
+    // There is no FallbackPolicy (it would also hit /health, /alive and OpenAPI), so this guards against a new /api
+    // endpoint that forgets RequirePermission/RequireAuthorization and is silently anonymous.
+    [Fact]
+    public void Every_api_endpoint_declares_authorization()
+    {
+        var endpoints = api.Services.GetRequiredService<EndpointDataSource>().Endpoints
+            .OfType<RouteEndpoint>()
+            .Where(e => e.RoutePattern.RawText!.StartsWith("/api", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        endpoints.Should().NotBeEmpty();
+        foreach (var endpoint in endpoints.Where(e => e.RoutePattern.RawText != "/api/auth/login"))
+        {
+            endpoint.Metadata.GetMetadata<IAuthorizeData>().Should().NotBeNull(endpoint.DisplayName);
+            endpoint.Metadata.GetMetadata<IAllowAnonymous>().Should().BeNull(endpoint.DisplayName);
+        }
     }
 }
