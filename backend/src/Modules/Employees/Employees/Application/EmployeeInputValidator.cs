@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 using BuildingBlocks.Abstractions;
 using Employees.Domain;
 using FluentValidation;
@@ -8,31 +7,30 @@ using FluentValidation;
 namespace Employees.Application;
 
 /// <summary>
-/// The validation rules table of the API contract, shared by create and update. Text lengths are checked after
-/// trimming, because the trimmed value is what gets stored.
+/// The validation rules table of the API contract, shared by create and update. The rules themselves live in
+/// <see cref="EmployeeRules"/> (the aggregate guards with the same ones); this class only adds the field-level
+/// messages. Text lengths are checked after trimming, because the trimmed value is what gets stored.
 /// </summary>
-internal abstract partial class EmployeeInputValidator<T> : AbstractValidator<T>
+internal abstract class EmployeeInputValidator<T> : AbstractValidator<T>
     where T : EmployeeInput
 {
-    public const int MaxPayItems = 20;
-    public static readonly DateOnly MinHireDate = new(1900, 1, 1);
-
     protected EmployeeInputValidator(IClock clock)
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.FullName).RequiredText("Full name", EmployeeLimits.MaxTextLength);
-        RuleFor(x => x.JobTitle).RequiredText("Job title", EmployeeLimits.MaxTextLength);
-        RuleFor(x => x.Department).RequiredText("Department", EmployeeLimits.MaxTextLength);
+        RuleFor(x => x.FullName).RequiredText("Full name", EmployeeRules.MaxTextLength);
+        RuleFor(x => x.JobTitle).RequiredText("Job title", EmployeeRules.MaxTextLength);
+        RuleFor(x => x.Department).RequiredText("Department", EmployeeRules.MaxTextLength);
 
         RuleFor(x => x.Email)
-            .RequiredText("Email", EmployeeLimits.MaxEmailLength)
-            .Must(email => EmailFormat().IsMatch(email!.Trim())).WithMessage("Email must be a valid email address.");
+            .RequiredText("Email", EmployeeRules.MaxEmailLength)
+            
+            .Must(email => EmployeeRules.IsValidEmailFormat(email!)).WithMessage("Email must be a valid email address.");
 
         RuleFor(x => x.HireDate)
             .NotNull().WithMessage("Hire date is required.")
             .Must(date => date <= DateOnly.FromDateTime(clock.UtcNow)).WithMessage("Hire date cannot be in the future.")
-            .Must(date => date >= MinHireDate).WithMessage($"Hire date cannot be before {MinHireDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.");
+            .Must(date => date >= EmployeeRules.MinHireDate).WithMessage($"Hire date cannot be before {EmployeeRules.MinHireDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.");
 
         RuleFor(x => x.BaseMonthlySalary).ValidMoney("Base monthly salary");
 
@@ -47,7 +45,7 @@ internal abstract partial class EmployeeInputValidator<T> : AbstractValidator<T>
     private void PayItems(Expression<Func<T, IEnumerable<PayItemInput>?>> list, string propertyName, string label)
     {
         RuleFor(list)
-            .Must(items => items is null || items.Count() <= MaxPayItems).WithMessage($"At most {MaxPayItems} {label} are allowed.")
+            .Must(items => items is null || items.Count() <= EmployeeRules.MaxPayItems).WithMessage($"At most {EmployeeRules.MaxPayItems} {label} are allowed.")
             .Custom((items, context) => ReportDuplicateNames(items, propertyName, context));
 
         RuleForEach(list!)
@@ -60,35 +58,27 @@ internal abstract partial class EmployeeInputValidator<T> : AbstractValidator<T>
         if (items is null)
             return;
 
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var seen = new HashSet<string>();
         foreach (var (item, i) in items.Select((item, i) => (item, i)))
         {
-            var name = item?.Name?.Trim();
-            if (!string.IsNullOrEmpty(name) && !seen.Add(name))
+            if (!string.IsNullOrWhiteSpace(item?.Name) && !seen.Add(EmployeeRules.PayItemNameKey(item.Name)))
                 context.AddFailure($"{propertyName}[{i}].{nameof(PayItemInput.Name)}", "Name must be unique within the list.");
         }
     }
-
-    [GeneratedRegex(@"^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$")]
-    private static partial Regex EmailFormat();
 }
 
 internal sealed class PayItemInputValidator : AbstractValidator<PayItemInput>
 {
-    public const int MaxNameLength = 50;
-
     public PayItemInputValidator()
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
-        RuleFor(x => x.Name).RequiredText("Name", MaxNameLength);
+        RuleFor(x => x.Name).RequiredText("Name", EmployeeRules.MaxPayItemNameLength);
         RuleFor(x => x.Amount).ValidMoney("Amount");
     }
 }
 
 internal static class InputRules
 {
-    public const decimal MaxAmount = 1_000_000m;
-
     /// <summary>Not blank, and at most <paramref name="maxLength"/> characters once trimmed.</summary>
     public static IRuleBuilderOptions<T, string?> RequiredText<T>(this IRuleBuilder<T, string?> rule, string label, int maxLength) =>
         rule.NotEmpty().WithMessage($"{label} is required.")
@@ -98,6 +88,6 @@ internal static class InputRules
     public static IRuleBuilderOptions<T, decimal?> ValidMoney<T>(this IRuleBuilder<T, decimal?> rule, string label) =>
         rule.NotNull().WithMessage($"{label} is required.")
             .GreaterThan(0m).WithMessage($"{label} must be greater than 0.")
-            .LessThanOrEqualTo(MaxAmount).WithMessage(string.Create(CultureInfo.InvariantCulture, $"{label} must be at most {MaxAmount:N0}."))
-            .Must(amount => decimal.Round(amount!.Value, 2) == amount).WithMessage($"{label} must have at most 2 decimal places.");
+            .LessThanOrEqualTo(EmployeeRules.MaxAmount).WithMessage(string.Create(CultureInfo.InvariantCulture, $"{label} must be at most {EmployeeRules.MaxAmount:N0}."))
+            .Must(amount => EmployeeRules.HasAtMostTwoDecimals(amount!.Value)).WithMessage($"{label} must have at most 2 decimal places.");
 }

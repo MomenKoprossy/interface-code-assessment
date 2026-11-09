@@ -94,6 +94,7 @@ No try/catch in handlers or endpoints.
 | Concern | Where |
 |---|---|
 | Validation | FluentValidation validators in module cores, run by the mediator `ValidationBehavior` → 400 ProblemDetails with camelCase field paths |
+| Domain invariants | The rules themselves live in the domain (`EmployeeRules`: limits + predicates). The validator adds field messages on top; the `Employee` aggregate re-checks the same rules as **guards** in `Create`/`Update`, so a caller that skips validation (seeder, another module, a test) gets an `ArgumentException`, not an invalid employee. One rule source, two uses |
 | Error format | RFC 7807 ProblemDetails everywhere (BuildingBlocks.Web): `type,title,status,detail,traceId,errors?` |
 | AuthN | JWT bearer (HS256, key from env), issued by the Identity module |
 | AuthZ | Permission claims + `RequirePermission(...)` (BuildingBlocks.Web), plus a resource rule in Payroll (an Employee may read only their own payslip), all enforced server-side. Permission names live in the owning module's `*.Contracts` (`EmployeePermissions`, `PayrollPermissions`), so Identity's role map can't drift from what endpoints check. An integration test asserts every `/api` endpoint except login declares authorization |

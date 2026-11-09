@@ -277,7 +277,7 @@ public sealed class EmailUniquenessTests(ApiFactory api)
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Add(Employee.Create(new EmployeeData(
             "Racing Duplicate", first.Email, "Engineer", "Engineering", new DateOnly(2020, 1, 1), 1000m,
-            EmployeeStatus.Active, [], [])));
+            EmployeeStatus.Active, [], []), ApiFactory.Today));
 
         var thrown = await FluentActions.Awaiting(() => db.SaveChangesAsync()).Should().ThrowAsync<DbUpdateException>();
 

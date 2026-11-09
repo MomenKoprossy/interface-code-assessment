@@ -36,5 +36,5 @@ internal static class TestData
             [new PayItem("Transport", 500m)], [new PayItem("Union dues", 50m)]);
 
     public static Employee Employee(string email = "sara.ahmed@acme.test", EmployeeStatus status = EmployeeStatus.Active) =>
-        Domain.Employee.Create(Data(email, status));
+        Domain.Employee.Create(Data(email, status), Today);
 }

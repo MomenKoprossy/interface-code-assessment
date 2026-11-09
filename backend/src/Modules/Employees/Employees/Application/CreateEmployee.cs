@@ -8,7 +8,7 @@ public sealed record CreateEmployeeCommand : EmployeeInput, ICommand<Result<Empl
 
 internal sealed class CreateEmployeeValidator(IClock clock) : EmployeeInputValidator<CreateEmployeeCommand>(clock);
 
-internal sealed class CreateEmployeeHandler(IEmployeeRepository employees, IUnitOfWork unitOfWork)
+internal sealed class CreateEmployeeHandler(IEmployeeRepository employees, IUnitOfWork unitOfWork, IClock clock)
     : IRequestHandler<CreateEmployeeCommand, Result<EmployeeDetails>>
 {
     public async ValueTask<Result<EmployeeDetails>> Handle(CreateEmployeeCommand command, CancellationToken cancellationToken)
@@ -17,7 +17,7 @@ internal sealed class CreateEmployeeHandler(IEmployeeRepository employees, IUnit
         if (await employees.FindIdByEmailAsync(Employee.NormalizeEmail(data.Email), cancellationToken) is not null)
             return EmployeeErrors.EmailInUse;
 
-        var employee = Employee.Create(data);
+        var employee = Employee.Create(data, DateOnly.FromDateTime(clock.UtcNow));
         await employees.AddAsync(employee, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return employee.ToDetails();

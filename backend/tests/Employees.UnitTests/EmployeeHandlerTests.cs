@@ -17,7 +17,7 @@ public sealed class EmployeeHandlerTests
     {
         var command = TestData.ValidCreate() with { FullName = " Sara Ahmed ", Email = "Sara.Ahmed@Acme.Test" };
 
-        var result = await new CreateEmployeeHandler(_employees, _unitOfWork).Handle(command, TestContext.Current.CancellationToken);
+        var result = await new CreateEmployeeHandler(_employees, _unitOfWork, TestData.PinnedClock()).Handle(command, TestContext.Current.CancellationToken);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.FullName.Should().Be("Sara Ahmed");
@@ -37,7 +37,7 @@ public sealed class EmployeeHandlerTests
     {
         _employees.FindIdByEmailAsync("sara.ahmed@acme.test", Arg.Any<CancellationToken>()).Returns(Guid.NewGuid());
 
-        var result = await new CreateEmployeeHandler(_employees, _unitOfWork)
+        var result = await new CreateEmployeeHandler(_employees, _unitOfWork, TestData.PinnedClock())
             .Handle(TestData.ValidCreate() with { Email = email }, TestContext.Current.CancellationToken);
 
         result.Error.Should().Be(Error.Conflict("Email is already used by another employee.", "email"));
@@ -52,7 +52,7 @@ public sealed class EmployeeHandlerTests
         _employees.FindAsync(employee.Id, Arg.Any<CancellationToken>()).Returns(employee);
         var command = Update(employee.Id) with { JobTitle = "Lead", Status = "Inactive", Allowances = [] };
 
-        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork).Handle(command, TestContext.Current.CancellationToken);
+        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork, TestData.PinnedClock()).Handle(command, TestContext.Current.CancellationToken);
 
         result.Value.JobTitle.Should().Be("Lead");
         result.Value.Status.Should().Be(EmployeeStatus.Inactive);
@@ -68,7 +68,7 @@ public sealed class EmployeeHandlerTests
         _employees.FindAsync(employee.Id, Arg.Any<CancellationToken>()).Returns(employee);
         _employees.FindIdByEmailAsync("sara.ahmed@acme.test", Arg.Any<CancellationToken>()).Returns(employee.Id);
 
-        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork)
+        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork, TestData.PinnedClock())
             .Handle(Update(employee.Id) with { Email = "SARA.AHMED@acme.test" }, TestContext.Current.CancellationToken);
 
         result.IsSuccess.Should().BeTrue();
@@ -81,7 +81,7 @@ public sealed class EmployeeHandlerTests
         _employees.FindAsync(employee.Id, Arg.Any<CancellationToken>()).Returns(employee);
         _employees.FindIdByEmailAsync("omar.hassan@acme.test", Arg.Any<CancellationToken>()).Returns(Guid.NewGuid());
 
-        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork)
+        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork, TestData.PinnedClock())
             .Handle(Update(employee.Id) with { Email = "Omar.Hassan@acme.test" }, TestContext.Current.CancellationToken);
 
         result.Error.Should().Be(EmployeeErrors.EmailInUse);
@@ -92,7 +92,7 @@ public sealed class EmployeeHandlerTests
     [Fact]
     public async Task Update_of_a_missing_employee_is_not_found()
     {
-        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork).Handle(Update(Guid.NewGuid()), TestContext.Current.CancellationToken);
+        var result = await new UpdateEmployeeHandler(_employees, _unitOfWork, TestData.PinnedClock()).Handle(Update(Guid.NewGuid()), TestContext.Current.CancellationToken);
 
         result.Error?.Type.Should().Be(ErrorType.NotFound);
         await _unitOfWork.DidNotReceiveWithAnyArgs().SaveChangesAsync(TestContext.Current.CancellationToken);

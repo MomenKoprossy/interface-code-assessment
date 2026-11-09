@@ -5,8 +5,10 @@ using Employees.Contracts;
 namespace Employees.Domain;
 
 /// <summary>
-/// An employee and the fixed monthly pay items Payroll reads. Input rules are enforced by the application
-/// validator before the aggregate is built; the aggregate owns normalization and the deactivation event.
+/// An employee and the fixed monthly pay items Payroll reads. The aggregate protects its own invariants: every
+/// <see cref="Create"/>/<see cref="Update"/> is checked against <see cref="EmployeeRules"/>. Those checks are
+/// guards, not user validation: API input is validated first (with field messages) by the application validator
+/// using the same rules, so reaching a guard means a caller skipped validation, which is a bug, and it throws.
 /// </summary>
 public sealed class Employee : AggregateRoot<Guid>, IAuditable, ISoftDeletable
 {
@@ -35,17 +37,20 @@ public sealed class Employee : AggregateRoot<Guid>, IAuditable, ISoftDeletable
 
     private Employee() { }
 
-    public static Employee Create(EmployeeData data)
+    /// <param name="data">The employee's fields.</param>
+    /// <param name="today">Today's date in UTC, for the "hire date not in the future" invariant.</param>
+    public static Employee Create(EmployeeData data, DateOnly today)
     {
         var employee = new Employee { Id = Guid.CreateVersion7() };
-        employee.Apply(data);
+        employee.Apply(data, today);
         return employee;
     }
 
-    public void Update(EmployeeData data)
+    /// <inheritdoc cref="Create"/>
+    public void Update(EmployeeData data, DateOnly today)
     {
         var wasActive = IsActive;
-        Apply(data);
+        Apply(data, today);
 
         if (wasActive && !IsActive)
             Raise(new EmployeeDeactivated(Id));
@@ -53,8 +58,10 @@ public sealed class Employee : AggregateRoot<Guid>, IAuditable, ISoftDeletable
 
     public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 
-    private void Apply(EmployeeData data)
+    private void Apply(EmployeeData data, DateOnly today)
     {
+        EnsureValid(data, today);
+
         FullName = data.FullName.Trim();
         Email = NormalizeEmail(data.Email);
         JobTitle = data.JobTitle.Trim();
@@ -64,6 +71,25 @@ public sealed class Employee : AggregateRoot<Guid>, IAuditable, ISoftDeletable
         Status = data.Status;
         _allowances = Normalize(data.Allowances);
         _deductions = Normalize(data.Deductions);
+    }
+
+    private static void EnsureValid(EmployeeData data, DateOnly today)
+    {
+        Guard(EmployeeRules.IsValidText(data.FullName, EmployeeRules.MaxTextLength), nameof(data.FullName));
+        Guard(EmployeeRules.IsValidEmail(data.Email), nameof(data.Email));
+        Guard(EmployeeRules.IsValidText(data.JobTitle, EmployeeRules.MaxTextLength), nameof(data.JobTitle));
+        Guard(EmployeeRules.IsValidText(data.Department, EmployeeRules.MaxTextLength), nameof(data.Department));
+        Guard(EmployeeRules.IsValidHireDate(data.HireDate, today), nameof(data.HireDate));
+        Guard(EmployeeRules.IsValidMoney(data.BaseMonthlySalary), nameof(data.BaseMonthlySalary));
+        Guard(Enum.IsDefined(data.Status), nameof(data.Status));
+        Guard(data.Allowances is not null && EmployeeRules.IsValidPayItemList(data.Allowances), nameof(data.Allowances));
+        Guard(data.Deductions is not null && EmployeeRules.IsValidPayItemList(data.Deductions), nameof(data.Deductions));
+    }
+
+    private static void Guard(bool holds, string field)
+    {
+        if (!holds)
+            throw new ArgumentException($"Employee invariant violated for {field}; input must be validated before it reaches the aggregate.", field);
     }
 
     private static List<PayItem> Normalize(IEnumerable<PayItem> items) =>

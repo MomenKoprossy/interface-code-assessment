@@ -1,3 +1,4 @@
+using BuildingBlocks.Abstractions;
 using BuildingBlocks.Data;
 using Employees.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ namespace Employees.Infrastructure.Persistence;
 /// Demo data. Runs once: skipped as soon as any employee row exists (deleted ones included).
 /// Sara Ahmed and Omar Hassan are the employees the Identity module links its demo logins to, by email.
 /// </summary>
-internal sealed class EmployeesSeeder(DbContext db) : IDataSeeder
+internal sealed class EmployeesSeeder(DbContext db, IClock clock) : IDataSeeder
 {
     public int Order => 10;
 
@@ -17,7 +18,8 @@ internal sealed class EmployeesSeeder(DbContext db) : IDataSeeder
         if (await db.Set<Employee>().IgnoreQueryFilters().AnyAsync(cancellationToken))
             return;
 
-        db.Set<Employee>().AddRange(DemoEmployees().Select(Employee.Create));
+        var today = DateOnly.FromDateTime(clock.UtcNow);
+        db.Set<Employee>().AddRange(DemoEmployees().Select(data => Employee.Create(data, today)));
         await db.SaveChangesAsync(cancellationToken);
     }
 

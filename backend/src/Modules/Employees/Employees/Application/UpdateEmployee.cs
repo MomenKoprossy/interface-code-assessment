@@ -14,7 +14,7 @@ public sealed record UpdateEmployeeCommand : EmployeeInput, ICommand<Result<Empl
 
 internal sealed class UpdateEmployeeValidator(IClock clock) : EmployeeInputValidator<UpdateEmployeeCommand>(clock);
 
-internal sealed class UpdateEmployeeHandler(IEmployeeRepository employees, IUnitOfWork unitOfWork)
+internal sealed class UpdateEmployeeHandler(IEmployeeRepository employees, IUnitOfWork unitOfWork, IClock clock)
     : IRequestHandler<UpdateEmployeeCommand, Result<EmployeeDetails>>
 {
     public async ValueTask<Result<EmployeeDetails>> Handle(UpdateEmployeeCommand command, CancellationToken cancellationToken)
@@ -28,7 +28,7 @@ internal sealed class UpdateEmployeeHandler(IEmployeeRepository employees, IUnit
         if (emailOwner is not null && emailOwner != employee.Id)
             return EmployeeErrors.EmailInUse;
 
-        employee.Update(data);
+        employee.Update(data, DateOnly.FromDateTime(clock.UtcNow));
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return employee.ToDetails();
     }
