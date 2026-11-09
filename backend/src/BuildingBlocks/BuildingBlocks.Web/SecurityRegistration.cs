@@ -13,8 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 namespace BuildingBlocks.Web;
 
 /// <summary>
-/// Security baseline (§13): JWT bearer (symmetric key from config section <c>Jwt</c>), the permission
-/// policy provider + handler (super-admin short-circuit), a global fixed-window rate limiter, and
+/// Security baseline: JWT bearer (symmetric key from config section <c>Jwt</c>), the permission
+/// policy provider + handler (exact permission claim), a global fixed-window rate limiter, and
 /// sensible security headers. Wired by <c>AddPlatform()</c>.
 /// </summary>
 public static class SecurityRegistration

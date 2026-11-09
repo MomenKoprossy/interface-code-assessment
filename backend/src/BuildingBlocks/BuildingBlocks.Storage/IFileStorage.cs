@@ -2,7 +2,7 @@ namespace BuildingBlocks.Storage;
 
 /// <summary>
 /// Abstraction over physical file storage. Implemented by <see cref="LocalFileStorage"/> (disk)
-/// and <see cref="S3FileStorage"/> (AWS S3 / MinIO / DO Spaces), selected by configuration (§4.3).
+/// and <see cref="S3FileStorage"/> (AWS S3 / MinIO / DO Spaces), selected by configuration.
 /// </summary>
 public interface IFileStorage
 {

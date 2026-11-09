@@ -4,7 +4,7 @@ namespace BuildingBlocks.Grpc;
 
 /// <summary>
 /// Composition helpers for contract-first gRPC: a server registration and a typed-client
-/// registration bound to a logical service-discovery name with standard resilience (§11.1).
+/// registration bound to a logical service-discovery name with standard resilience.
 /// </summary>
 public static class GrpcServiceCollectionExtensions
 {

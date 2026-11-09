@@ -2,7 +2,7 @@
 
 | Block | Used by the app? | Purpose |
 | --- | --- | --- |
-| `BuildingBlocks.Core` | **yes** | Result/Error, paging, repository/clock/current-user abstractions, DDD primitives (Entity, AggregateRoot, value objects, domain events), hand-rolled mediator + pipeline behaviors (logging, exception logging, FluentValidation). No infrastructure dependencies. |
+| `BuildingBlocks.Core` | **yes** | Result/Error, paging, repository/clock/current-user abstractions, DDD primitives (Entity, AggregateRoot, value objects, domain events), hand-rolled mediator + pipeline behaviors (logging, FluentValidation). No infrastructure dependencies. |
 | `BuildingBlocks.Data` | **yes** | EF Core `AppDbContextBase` (audit stamping, soft delete + global filter, domain-event dispatch after save), `EfRepository`, `EfUnitOfWork`, `IModuleModelConfiguration`, `IDataSeeder`. |
 | `BuildingBlocks.Web` | **yes** | `AddPlatform`/`UsePlatform`, ProblemDetails + global exception handler (+ `IExceptionProblemMapper`), `Result` → `IResult`, JWT bearer, permission authorization, rate limiting, security headers. |
 | `BuildingBlocks.Caching` | growth path | `AddPlatformCaching()`: HybridCache (L1 memory, Redis L2 when a `cache` connection string exists). |
@@ -24,3 +24,7 @@ that runs can be read and reviewed (ADR-002). `BuildingBlocks.slnx` builds and t
 5. `IModuleModelConfiguration` + `IDataSeeder` (BuildingBlocks.Data), for modular-monolith composition.
 6. Packaging/local feed removed. ServiceDefaults trimmed to what this app uses, and health endpoints mapped in every
    environment (container healthchecks).
+7. Removed template leftovers: CMS `PublishableEntity`, the `SuperAdmin`/`permission=*` bypass, the
+   `UnhandledExceptionBehavior` (exceptions are logged once, by `GlobalExceptionHandler`) and the unread
+   `PlatformOptions` toggles. HybridCache moved out of `.Data` into the `BuildingBlocks.Caching` growth block.
+8. Named `login` rate-limit policy (`SecurityRegistration.LoginRateLimitPolicy`, `RateLimiting:LoginPermitLimit`).

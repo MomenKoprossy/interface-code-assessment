@@ -17,7 +17,7 @@ public interface IExceptionProblemMapper
 }
 
 /// <summary>
-/// Converts unhandled exceptions into RFC 7807 ProblemDetails (§6). A thrown
+/// Converts unhandled exceptions into RFC 7807 ProblemDetails. A thrown
 /// <see cref="ValidationException"/> (from the mediator validation behavior) becomes 400 with per-field
 /// errors keyed by camelCase property path; registered <see cref="IExceptionProblemMapper"/>s get a chance
 /// next; everything else is a 500 that never leaks internals. The trace id is always attached.

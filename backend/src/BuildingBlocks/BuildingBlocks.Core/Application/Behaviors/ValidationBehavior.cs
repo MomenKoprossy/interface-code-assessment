@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace BuildingBlocks.Application;
 
-/// <summary>Runs all FluentValidation validators for the request before the handler (spec §6).
+/// <summary>Runs all FluentValidation validators for the request before the handler.
 /// On failure throws ValidationException → mapped to 400 ProblemDetails by the web layer.</summary>
 public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>

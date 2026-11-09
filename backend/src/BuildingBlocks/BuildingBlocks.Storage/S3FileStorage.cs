@@ -8,7 +8,7 @@ namespace BuildingBlocks.Storage;
 /// S3-compatible <see cref="IFileStorage"/> (AWS S3, MinIO, DigitalOcean Spaces — only
 /// <c>ServiceUrl</c>/<c>ForcePathStyle</c> differ). Uses standard SigV4 payload signing on upload
 /// (works over both http MinIO dev endpoints and https S3) and presigned GET URLs for download.
-/// Note: AWSSDK v4 forbids <c>DisablePayloadSigning=true</c> over plain http, so it is NOT set. See §4.3.
+/// Note: AWSSDK v4 forbids <c>DisablePayloadSigning=true</c> over plain http, so it is NOT set.
 /// </summary>
 internal sealed class S3FileStorage(IAmazonS3 s3, IOptions<FileStorageOptions> opt) : IFileStorage
 {

@@ -5,7 +5,7 @@ namespace BuildingBlocks.Web;
 
 /// <summary>
 /// Inbound request/response logging for every request — metadata only (method, path, query, status,
-/// duration), one entry per request. Bodies are off by default (PII + size) (§15.5).
+/// duration), one entry per request. Bodies are off by default (PII + size).
 /// </summary>
 public static class HttpLoggingRegistration
 {

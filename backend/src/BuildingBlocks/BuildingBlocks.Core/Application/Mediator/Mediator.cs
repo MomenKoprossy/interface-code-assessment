@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace BuildingBlocks.Application;
 
 /// <summary>
-/// ~40-line hand-rolled dispatcher (spec §6) — resolves the IRequestHandler&lt;,&gt; for a request from DI
+/// ~40-line hand-rolled dispatcher — resolves the IRequestHandler&lt;,&gt; for a request from DI
 /// and wraps it in the ordered IPipelineBehavior&lt;,&gt; list. Zero third-party pipeline dependency.
 /// Wrapper types are cached per request type so dispatch is reflection-free after the first call.
 /// </summary>

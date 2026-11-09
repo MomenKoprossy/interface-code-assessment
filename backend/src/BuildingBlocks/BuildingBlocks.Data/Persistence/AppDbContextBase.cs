@@ -17,10 +17,9 @@ namespace BuildingBlocks.Data;
 /// is selected by the consuming SERVICE, not here.
 /// </summary>
 /// <remarks>
-/// Derived contexts should call
-/// <c>modelBuilder.ApplyConfigurationsFromAssembly(typeof(MyDbContext).Assembly)</c> from their own
-/// <see cref="OnModelCreating"/> override (after calling <c>base.OnModelCreating(modelBuilder)</c>) to
-/// pick up their <see cref="IEntityTypeConfiguration{TEntity}"/> mappings.
+/// Derived contexts must apply their mappings (for example via <see cref="IModuleModelConfiguration"/>) BEFORE
+/// calling <c>base.OnModelCreating(modelBuilder)</c>: the soft-delete filters and domain-event ignores are applied
+/// only to entity types already in the model.
 /// </remarks>
 public abstract class AppDbContextBase : DbContext
 {

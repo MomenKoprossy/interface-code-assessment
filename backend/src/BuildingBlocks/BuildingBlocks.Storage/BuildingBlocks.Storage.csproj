@@ -2,8 +2,8 @@
 
   <!--
     BuildingBlocks.Storage = IFileStorage with Local + S3-compatible providers, selected by
-    config (spec §4.3). S3 provider works with AWS S3, MinIO, DO Spaces via ServiceUrl +
-    ForcePathStyle. Only the Attachment service references this.
+    config. S3 provider works with AWS S3, MinIO, DO Spaces via ServiceUrl +
+    ForcePathStyle.
   -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Storage</RootNamespace>
