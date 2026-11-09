@@ -16,7 +16,7 @@ public sealed class PayrollCalculator(IEnumerable<IPayrollRule> rules)
     {
         if (!employee.IsActive)
             return Error.Unprocessable("Payslip is not available for an inactive employee.");
-        // ponytail: hired mid-month gets the full month, no proration (documented limitation).
+        // Assumption: hired mid-month gets the full month, no proration (documented limitation).
         if (month.LastDay < employee.HireDate)
             return Error.Unprocessable($"Employee was not yet hired in {month}.");
 

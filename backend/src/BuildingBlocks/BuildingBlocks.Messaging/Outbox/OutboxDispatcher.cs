@@ -14,7 +14,7 @@ namespace BuildingBlocks.Messaging;
 /// <see cref="OutboxMessage.Error"/> so it doesn't block the queue.
 /// </summary>
 /// <remarks>
-/// ponytail: single-instance poller — two replicas may both publish a row (still at-least-once); claim rows
+/// Known limitation: single-instance poller — two replicas may both publish a row (still at-least-once); claim rows
 /// with <c>FOR UPDATE SKIP LOCKED</c> if a service scales out. Processed rows are kept; add a retention
 /// delete if the table grows.
 /// </remarks>

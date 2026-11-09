@@ -6,7 +6,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS projects
 WORKDIR /src
 COPY src ./src
 # Keep only the files restore needs, so the restore layer below is reused until a project or props file changes.
-# ponytail: discovers project files instead of listing them, so modules that add projects need no Dockerfile edit.
+# Note: discovers project files instead of listing them, so modules that add projects need no Dockerfile edit.
 RUN find src -type f ! -name '*.csproj' ! -name 'Directory.*.props' -delete
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
