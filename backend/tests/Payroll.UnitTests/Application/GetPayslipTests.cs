@@ -40,7 +40,7 @@ public class GetPayslipTests
         var result = await Handle("2026-03");
 
         result.Error!.Value.Type.Should().Be(ErrorType.NotFound);
-        result.Error.Value.Message.Should().Be("Employee not found.");
+        result.Error.Value.Message.Should().Be("Employee was not found.");
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public class GetPayslipTests
     [InlineData("26-03", PayrollMonthFormat)]
     public void Validator_rejects_missing_or_malformed_month(string? month, string message)
     {
-        var result = new GetPayslipQueryValidator().Validate(new GetPayslipQuery(EmployeeId, month));
+        var result = new GetPayslipValidator().Validate(new GetPayslipQuery(EmployeeId, month));
 
         result.Errors.Should().ContainSingle()
             .Which.Should().Match<FluentValidation.Results.ValidationFailure>(f => f.PropertyName == "Month" && f.ErrorMessage == message);
@@ -122,7 +122,7 @@ public class GetPayslipTests
 
     [Fact]
     public void Validator_accepts_a_well_formed_month() =>
-        new GetPayslipQueryValidator().Validate(new GetPayslipQuery(EmployeeId, "2026-03")).IsValid.Should().BeTrue();
+        new GetPayslipValidator().Validate(new GetPayslipQuery(EmployeeId, "2026-03")).IsValid.Should().BeTrue();
 
     private const string PayrollMonthFormat = Payroll.Domain.PayrollMonth.FormatMessage;
 

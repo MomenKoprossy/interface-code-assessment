@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Payroll module ADAPTERS: EF Core mappings + repositories, minimal-API endpoints, options binding, seeding,
-       and the module's composition (AddPayrollModule / MapPayrollEndpoints). -->
+  <!-- Payroll module ADAPTERS: minimal-API endpoints, options binding/validation, and the module's composition
+       (AddPayrollModule / MapPayrollEndpoints). No persistence: payslips are computed on request. -->
   <PropertyGroup>
     <RootNamespace>Payroll.Infrastructure</RootNamespace>
   </PropertyGroup>
@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Payroll\Payroll.csproj" />
-    <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Data\BuildingBlocks.Data.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Web\BuildingBlocks.Web.csproj" />
   </ItemGroup>
 
