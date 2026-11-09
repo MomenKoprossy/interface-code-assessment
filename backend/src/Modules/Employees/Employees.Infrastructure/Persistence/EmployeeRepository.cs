@@ -51,8 +51,13 @@ internal sealed class EmployeeRepository(DbContext db) : IEmployeeRepository
         return new PagedList<Employee>(items, page.Page, page.PageSize, total);
     }
 
+    // Case-insensitive like the department filter: "Sales" and "sales" are one option (one stored spelling is kept).
     public async Task<IReadOnlyList<string>> ListDepartmentsAsync(CancellationToken cancellationToken = default) =>
-        await Employees.Select(e => e.Department).Distinct().OrderBy(d => d).ToListAsync(cancellationToken);
+        await Employees
+            .GroupBy(e => e.Department.ToLower())
+            .Select(g => g.Min(e => e.Department)!)
+            .OrderBy(d => d)
+            .ToListAsync(cancellationToken);
 
     public async Task AddAsync(Employee employee, CancellationToken cancellationToken = default) =>
         await Employees.AddAsync(employee, cancellationToken);
