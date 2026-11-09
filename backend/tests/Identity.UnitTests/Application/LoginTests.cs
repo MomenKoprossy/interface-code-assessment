@@ -24,7 +24,7 @@ public class LoginTests
     }
 
     private ValueTask<Result<LoginResponse>> Login(string email, string password) =>
-        new LoginCommandHandler(_users, _hasher, _tokens).Handle(new LoginCommand(email, password), CancellationToken.None);
+        new LoginHandler(_users, _hasher, _tokens).Handle(new LoginCommand(email, password), CancellationToken.None);
 
     [Fact]
     public async Task Valid_credentials_return_token_and_current_user()
