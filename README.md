@@ -114,6 +114,6 @@ DotnetPlayGround template, which the AI vendored and modified. The architecture 
 my verbatim prompts). I reviewed, ran and verified everything, and every agent claim was re-checked by re-running the suites.
 
 Everything is in [`ai-usage/`](ai-usage/README.md) → [`.claude/ai-usage/`](.claude/ai-usage/README.md): prompts,
-full transcripts, the orchestration scripts, every skill, plugin, MCP server and instruction file with its reason. The
+the orchestration scripts (every agent's brief), a blind assessment, every skill, plugin, MCP server and instruction file with its reason. The
 process record is in [`.claude/process/`](.claude/process/): the plan, a phase-by-phase log, the review log with every
 finding and verdict, and the test report.
