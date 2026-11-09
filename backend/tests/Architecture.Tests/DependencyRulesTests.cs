@@ -55,17 +55,20 @@ public sealed class DependencyRulesTests
         result.ShouldPass($"{module} must not depend on {other}");
     }
 
-    [Fact]
-    public void Employees_contracts_depend_only_on_the_BCL_and_BuildingBlocks_Core()
-    {
-        string[] allowed = ["System", "Employees.Contracts", .. Arch.TypeNamesOf(Arch.Load("BuildingBlocks.Core"))];
+    public static TheoryData<string> Contracts => new(Arch.Contracts);
 
-        var result = Types.InAssembly(Arch.EmployeesContracts)
+    [Theory]
+    [MemberData(nameof(Contracts))]
+    public void Contracts_depend_only_on_the_BCL_and_BuildingBlocks_Core(string contracts)
+    {
+        string[] allowed = ["System", contracts, .. Arch.TypeNamesOf(Arch.Load("BuildingBlocks.Core"))];
+
+        var result = Types.InAssembly(Arch.Load(contracts))
             .ShouldNot()
             .HaveDependencyOtherThan(allowed)
             .GetResult();
 
-        result.ShouldPass("Employees.Contracts is a public API: BCL (and BuildingBlocks.Core) only, no EF, ASP.NET or other blocks");
+        result.ShouldPass($"{contracts} is a public API: BCL (and BuildingBlocks.Core) only, no EF, ASP.NET or other blocks");
     }
 
     [Theory]

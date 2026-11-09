@@ -68,7 +68,7 @@ public static class HttpAssertions
 {
     /// <summary>
     /// Asserts the contract's error shape: <c>application/problem+json</c> with type, title, status (matching the
-    /// HTTP status) and a traceId. Returns the parsed body; <see cref="ProblemBody.Errors"/> is empty when absent.
+    /// HTTP status) and a W3C traceId. Returns the parsed body; <see cref="ProblemBody.Errors"/> is empty when absent.
     /// </summary>
     public static async Task<ProblemBody> ShouldBeProblemAsync(this HttpResponseMessage response, HttpStatusCode status)
     {
@@ -94,7 +94,7 @@ public static class HttpAssertions
         problem.Status.Should().Be((int)status);
         problem.Type.Should().NotBeNullOrWhiteSpace();
         problem.Title.Should().NotBeNullOrWhiteSpace();
-        problem.TraceId.Should().NotBeNullOrWhiteSpace();
+        problem.TraceId.Should().StartWith("00-", "traceId is the W3C traceparent of the request, on every error path");
         return problem;
     }
 
