@@ -52,13 +52,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # The images are built, never run, so compose just needs every required variable set: fill the secrets that
-      # .env.example leaves empty (JWT_KEY always) with throwaway random values.
+      # Fill JWT_KEY, which .env.example leaves empty, with a throwaway random value.
       - name: Create .env
         run: |
           cp .env.example .env
           sed -i "s|^JWT_KEY=$|JWT_KEY=$(openssl rand -base64 48)|" .env
-          sed -i "s|^POSTGRES_PASSWORD=$|POSTGRES_PASSWORD=$(openssl rand -hex 16)|" .env
-          sed -i "s|^DEMO_PASSWORD=$|DEMO_PASSWORD=$(openssl rand -hex 16)|" .env
       - run: docker compose config --quiet
       - run: docker compose build
+      # Smoke test through nginx: --wait blocks until the health checks pass.
+      - run: docker compose up -d --wait
+      - run: curl -fsS http://127.0.0.1:8080/health
+      - run: curl -fsS http://127.0.0.1:8080/openapi/v1.json | jq -e '.servers[0].url | contains(":8080")'
+      - if: always()
+        run: docker compose down -v
