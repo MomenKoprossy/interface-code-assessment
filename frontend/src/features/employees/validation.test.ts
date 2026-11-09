@@ -67,7 +67,11 @@ describe('validateEmail', () => {
     ['ada', 'Enter a valid email address, like name@example.com.'],
     ['ada@example', 'Enter a valid email address, like name@example.com.'],
     ['ada lovelace@example.com', 'Enter a valid email address, like name@example.com.'],
+    ['a@b..c', 'Enter a valid email address, like name@example.com.'],
+    ['a@.b.c', 'Enter a valid email address, like name@example.com.'],
+    ['a@b.c.', 'Enter a valid email address, like name@example.com.'],
     ['ada@example.com', undefined],
+    ['ada@mail.example.co.uk', undefined],
     ['  ada@example.com  ', undefined],
   ])('%j → %j', (value, expected) => {
     expect(validateEmail(value)).toBe(expected);
@@ -103,6 +107,8 @@ describe('validateMoney', () => {
     ['1000000.01', 'Salary must be at most 1,000,000.'],
     ['12.34', undefined],
     ['12.345', 'Salary can have at most 2 decimals.'],
+    ['10.500', undefined],
+    ['10.505', 'Salary can have at most 2 decimals.'],
     ['-5', 'Salary must be a number.'],
     ['1e3', 'Salary must be a number.'],
     ['abc', 'Salary must be a number.'],

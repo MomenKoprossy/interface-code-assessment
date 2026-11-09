@@ -27,8 +27,13 @@
     background: $color-surface-alt;
   }
 
+  // Compound selector so it outranks `th, td` above without !important.
+  th.data-table__number,
+  td.data-table__number {
+    text-align: right;
+  }
+
   &__number {
-    text-align: right !important;
     font-variant-numeric: tabular-nums;
   }
 

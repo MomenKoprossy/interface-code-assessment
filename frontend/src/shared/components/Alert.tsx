@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-type Tone = 'error' | 'info' | 'warning' | 'success';
+type Tone = 'error' | 'info' | 'success';
 
-const icons: Record<Tone, string> = { error: '!', info: 'i', warning: '!', success: '✓' };
+const icons: Record<Tone, string> = { error: '!', info: 'i', success: '✓' };
 
 interface AlertProps {
   tone?: Tone;

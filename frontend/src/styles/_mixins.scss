@@ -1,7 +1,7 @@
 @use 'tokens' as *;
 
 @mixin focus-ring {
-  outline: 3px solid rgba($color-focus, 0.45);
+  outline: 2px solid $color-focus;
   outline-offset: 2px;
 }
 

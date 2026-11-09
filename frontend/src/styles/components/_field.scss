@@ -15,7 +15,7 @@
     width: 100%;
     min-height: $control-height;
     padding: $space-2 $space-2 + $space-1;
-    border: 1px solid $color-border-strong;
+    border: 1px solid $color-control-border;
     border-radius: $radius;
     background: $color-surface;
     color: $color-text;
@@ -25,11 +25,6 @@
       background: $color-surface-alt;
       color: $color-text-muted;
     }
-  }
-
-  &__hint {
-    font-size: $font-size-sm;
-    color: $color-text-muted;
   }
 
   &__error {

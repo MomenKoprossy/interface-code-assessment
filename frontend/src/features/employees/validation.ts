@@ -35,7 +35,7 @@ export const LIMITS = {
   earliestHireDate: '1900-01-01',
 } as const;
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$/;
 const MONEY_PATTERN = /^\d+(\.\d+)?$/;
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -67,7 +67,7 @@ export function validateMoney(value: string, label: string): string | undefined 
   const trimmed = value.trim();
   if (trimmed === '') return `${label} is required.`;
   if (!MONEY_PATTERN.test(trimmed)) return `${label} must be a number.`;
-  if ((trimmed.split('.')[1] ?? '').length > 2) return `${label} can have at most 2 decimals.`;
+  if ((trimmed.split('.')[1] ?? '').replace(/0+$/, '').length > 2) return `${label} can have at most 2 decimals.`;
   const amount = Number(trimmed);
   if (amount <= 0) return `${label} must be greater than 0.`;
   if (amount > LIMITS.moneyMax) return `${label} must be at most 1,000,000.`;
