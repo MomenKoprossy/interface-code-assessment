@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using Employees.Contracts;
 using Employees.Domain;
 
 namespace Employees.UnitTests;

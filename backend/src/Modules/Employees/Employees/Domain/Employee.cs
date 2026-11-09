@@ -1,5 +1,6 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.Domain;
+using Employees.Contracts;
 
 namespace Employees.Domain;
 

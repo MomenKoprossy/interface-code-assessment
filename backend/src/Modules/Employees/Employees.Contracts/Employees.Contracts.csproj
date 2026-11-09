@@ -1,8 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The Employees module's public API for other modules: interfaces + DTO records only. -->
+  <!-- The Employees module's public API for other modules: interfaces, DTO records and events only. -->
   <PropertyGroup>
     <RootNamespace>Employees.Contracts</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- For DomainEvent (EmployeeDeactivated). -->
+    <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.Core\BuildingBlocks.Core.csproj" />
+  </ItemGroup>
 
 </Project>
