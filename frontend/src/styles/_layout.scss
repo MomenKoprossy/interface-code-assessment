@@ -1,0 +1,116 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+.app-header {
+  background: $color-surface;
+  border-bottom: 1px solid $color-border;
+
+  &__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $space-2 $space-4;
+    max-width: $content-max-width;
+    margin: 0 auto;
+    padding: $space-2 $space-3;
+    min-height: 56px;
+  }
+
+  &__brand {
+    font-weight: 700;
+    color: $color-accent;
+  }
+
+  &__nav {
+    display: flex;
+    gap: $space-3;
+    flex: 1;
+
+    a {
+      color: $color-text-muted;
+      text-decoration: none;
+      font-weight: 500;
+      padding: $space-1 0;
+      border-bottom: 2px solid transparent;
+
+      &.active {
+        color: $color-text;
+        border-bottom-color: $color-accent;
+      }
+    }
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: $space-2;
+  }
+
+  &__name {
+    font-weight: 500;
+  }
+}
+
+.app-main {
+  max-width: $content-max-width;
+  margin: 0 auto;
+  padding: $space-4 $space-3 $space-6;
+
+  &:focus {
+    outline: none;
+  }
+
+  > * + * {
+    margin-top: $space-3;
+  }
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: $space-3;
+
+  &__title {
+    font-size: $font-size-xl;
+    line-height: 1.25;
+  }
+
+  &__subtitle {
+    margin-top: $space-1;
+    color: $color-text-muted;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $space-2;
+  }
+}
+
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: $space-3;
+
+  &__card {
+    width: 100%;
+    max-width: 400px;
+    padding: $space-5 $space-4;
+
+    > * + * {
+      margin-top: $space-3;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    color: $color-accent;
+  }
+
+  &__subtitle {
+    color: $color-text-muted;
+    margin-top: $space-1 !important;
+  }
+}

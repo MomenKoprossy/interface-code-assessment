@@ -1,0 +1,54 @@
+@use 'sass:list';
+@use '../tokens' as *;
+
+$alert-tones: (
+  error: ($color-danger, $color-danger-soft),
+  info: ($color-info, $color-info-soft),
+  warning: ($color-warning, $color-warning-soft),
+  success: ($color-success, $color-success-soft),
+);
+
+.alert {
+  display: flex;
+  gap: $space-2 + $space-1;
+  padding: $space-3;
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: $radius;
+
+  &__icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: $color-on-accent;
+    font-size: $font-size-sm;
+    font-weight: 700;
+  }
+
+  &__body > * + * {
+    margin-top: $space-2;
+  }
+
+  &__title {
+    font-weight: 600;
+  }
+
+  &__list {
+    margin: $space-1 0 0;
+    padding-left: $space-3;
+  }
+
+  @each $tone, $colors in $alert-tones {
+    &--#{$tone} {
+      border-color: list.nth($colors, 1);
+      background: list.nth($colors, 2);
+
+      .alert__icon {
+        background: list.nth($colors, 1);
+      }
+    }
+  }
+}

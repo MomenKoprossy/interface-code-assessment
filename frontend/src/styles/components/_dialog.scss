@@ -1,0 +1,45 @@
+@use '../tokens' as *;
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: $space-3;
+  background: rgba(16, 24, 40, 0.45);
+  z-index: 50;
+}
+
+.dialog {
+  width: 100%;
+  max-width: 440px;
+  padding: $space-4;
+  background: $color-surface;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-dialog;
+
+  &:focus {
+    outline: none;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+  }
+
+  &__body {
+    margin-top: $space-2;
+    color: $color-text-muted;
+
+    > * + * {
+      margin-top: $space-3;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: $space-2;
+    margin-top: $space-4;
+  }
+}

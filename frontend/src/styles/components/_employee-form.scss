@@ -1,0 +1,73 @@
+@use '../tokens' as *;
+@use '../mixins' as *;
+
+.employee-form > * + * {
+  margin-top: $space-3;
+}
+
+.form-section {
+  padding: $space-4;
+
+  > * + * {
+    margin-top: $space-3;
+  }
+
+  // Floating the legend pulls it inside the card instead of notching the border.
+  &__title {
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin-bottom: $space-2;
+    font-size: $font-size-lg;
+    font-weight: 600;
+
+    + * {
+      clear: both;
+    }
+  }
+
+  &__hint,
+  &__empty {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+  }
+
+  @include below($breakpoint-sm) {
+    padding: $space-2 $space-3 $space-3;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-3;
+
+  @include below($breakpoint-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pay-item {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  align-items: start;
+  gap: $space-2;
+
+  &__remove {
+    margin-top: $space-1;
+  }
+
+  @include below($breakpoint-sm) {
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    &__name {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $space-2;
+}

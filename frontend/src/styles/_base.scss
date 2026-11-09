@@ -1,0 +1,81 @@
+@use 'tokens' as *;
+@use 'mixins' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: $color-bg;
+  color: $color-text;
+  font-family: $font-family;
+  font-size: $font-size;
+  line-height: $line-height;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: $color-accent;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: $color-accent-hover;
+  }
+}
+
+:focus-visible {
+  @include focus-ring;
+}
+
+.visually-hidden {
+  @include visually-hidden;
+}
+
+.skip-link {
+  @include visually-hidden;
+
+  &:focus {
+    position: fixed !important;
+    top: $space-2;
+    left: $space-2;
+    width: auto;
+    height: auto;
+    margin: 0;
+    clip: auto;
+    padding: $space-2 $space-3;
+    background: $color-surface;
+    border-radius: $radius;
+    z-index: 100;
+  }
+}
+
+.card {
+  @include card;
+}
+
+.stack > * + * {
+  margin-top: $space-3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
