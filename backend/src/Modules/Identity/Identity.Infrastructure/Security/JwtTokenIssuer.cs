@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text;
 using BuildingBlocks.Abstractions;
+using Employees.Contracts;
 using Identity.Application;
 using Identity.Domain;
 using Microsoft.Extensions.Options;
@@ -12,9 +13,6 @@ namespace Identity.Infrastructure.Security;
 /// <summary>HS256 access tokens with raw claim types (sub, name, email, role, employee_id, permission).</summary>
 internal sealed class JwtTokenIssuer(IOptions<JwtOptions> options, IClock clock) : ITokenIssuer
 {
-    public const string EmployeeIdClaim = "employee_id";
-    public const string PermissionClaim = "permission";
-
     private static readonly JsonWebTokenHandler Handler = new();
 
     public AccessToken Issue(User user)
@@ -46,9 +44,9 @@ internal sealed class JwtTokenIssuer(IOptions<JwtOptions> options, IClock clock)
         yield return new Claim("role", user.Role.ToString());
 
         if (user.EmployeeId is { } employeeId)
-            yield return new Claim(EmployeeIdClaim, employeeId.ToString());
+            yield return new Claim(EmployeeClaimTypes.EmployeeId, employeeId.ToString());
 
         foreach (var permission in user.Permissions)
-            yield return new Claim(PermissionClaim, permission);
+            yield return new Claim(PlatformClaimTypes.Permission, permission);
     }
 }

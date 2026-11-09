@@ -1,3 +1,4 @@
+using BuildingBlocks.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 
 namespace BuildingBlocks.Web;
@@ -10,7 +11,7 @@ internal sealed class PermissionAuthorizationHandler : AuthorizationHandler<Perm
 {
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
-        if (context.User.HasClaim("permission", requirement.Permission))
+        if (context.User.HasClaim(PlatformClaimTypes.Permission, requirement.Permission))
             context.Succeed(requirement);
 
         return Task.CompletedTask;

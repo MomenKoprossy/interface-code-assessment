@@ -12,6 +12,7 @@
   </Folder>
   <Folder Name="/modules/Payroll/">
     <Project Path="src/Modules/Payroll/Payroll/Payroll.csproj" />
+    <Project Path="src/Modules/Payroll/Payroll.Contracts/Payroll.Contracts.csproj" />
     <Project Path="src/Modules/Payroll/Payroll.Infrastructure/Payroll.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/modules/Identity/">

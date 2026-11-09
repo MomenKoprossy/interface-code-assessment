@@ -27,7 +27,7 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) 
         User?.FindFirstValue("name") ?? User?.FindFirstValue(ClaimTypes.Name);
 
     public IReadOnlyCollection<string> Permissions =>
-        User?.FindAll("permission").Select(c => c.Value).ToArray() ?? [];
+        User?.FindAll(PlatformClaimTypes.Permission).Select(c => c.Value).ToArray() ?? [];
 
     public bool HasPermission(string permission) =>
         Permissions.Contains(permission);

@@ -21,6 +21,8 @@
 - `errors` keys are **camelCase property paths** (`fullName`, `allowances[1].name`). The UI maps them onto fields.
 - 400 validation · 401 unauthenticated · 403 forbidden · 404 not found · 409 conflict (`errors.email` on a
   duplicate email) · 422 business rule (payslip not computable) · 429 rate limited · 500 unexpected (no internals leaked).
+- Rate limits (per client IP, configurable): 100 requests / 10 s overall (`RateLimiting:PermitLimit`, `WindowSeconds`), and
+  **10 login attempts / minute** on `POST /api/auth/login` (`RateLimiting:LoginPermitLimit`).
 
 ## Auth
 
@@ -118,3 +120,5 @@ interface PayrollPolicy {
 ## Ops
 
 `GET /health` (readiness, checks the DB) · `GET /alive` (liveness) · `GET /openapi/v1.json` · `GET /swagger`
+
+OpenAPI and Swagger UI are served in Development, or when `OpenApi:Enabled=true` (docker compose sets it for reviewers).

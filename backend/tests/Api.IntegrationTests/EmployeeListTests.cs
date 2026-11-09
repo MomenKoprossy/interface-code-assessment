@@ -176,7 +176,7 @@ public sealed class EmployeeListTests(ApiFactory api)
         departments.Count(d => d == dept).Should().Be(1);
     }
 
-    [Fact(Skip = "pending F54 merge")] // fails until EmployeeRepository.ListDepartmentsAsync dedupes case-insensitively
+    [Fact]
     public async Task Departments_are_distinct_case_insensitively()
     {
         var (hr, dept) = await SeedDepartmentAsync(Named("Case One"));

@@ -43,7 +43,7 @@ public static class IdentityModule
             .WithName("Login")
             .AllowAnonymous()
             // Policy registered by the platform (SecurityRegistration): a tighter per-IP limit than the global one.
-            .RequireRateLimiting("login")
+            .RequireRateLimiting(SecurityRegistration.LoginRateLimitPolicy)
             .Produces<LoginResponse>()
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status401Unauthorized)

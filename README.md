@@ -51,7 +51,7 @@ cd frontend && npm test
 ```
 frontend (React/TS/SCSS) ──/api──▶ Api host (composition root only)
                                      ├─ Employees module   core │ contracts │ infrastructure
-                                     ├─ Payroll module     core │ infrastructure ── uses Employees.Contracts only
+                                     ├─ Payroll module     core │ contracts │ infrastructure ── uses Employees.Contracts only
                                      ├─ Identity module    core │ infrastructure
                                      └─ BuildingBlocks: Core · Data · Web  (+ Messaging · Grpc · Storage · Caching, vendored for growth)
                                    PostgreSQL: one database, one schema per module

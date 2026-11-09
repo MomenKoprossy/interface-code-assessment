@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -116,6 +117,22 @@ public sealed class AuthTests(ApiFactory api)
         var response = await client.GetAsync("/api/auth/me");
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    [Fact]
+    public async Task Login_is_throttled_per_client_with_a_429_problem()
+    {
+        // Its own host with a tiny login budget; the shared factory raises the limit so other tests never hit it.
+        await using var throttled = api.WithWebHostBuilder(b => b.UseSetting("RateLimiting:LoginPermitLimit", "2"));
+        using var client = throttled.CreateClient();
+        var attempt = new { email = ApiFactory.HrEmail, password = "not-the-password" };
+
+        (await client.PostAsJsonAsync("/api/auth/login", attempt)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        (await client.PostAsJsonAsync("/api/auth/login", attempt)).StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        await (await client.PostAsJsonAsync("/api/auth/login", attempt)).ShouldBeProblemAsync(HttpStatusCode.TooManyRequests);
+
+        using var other = await api.HrClientAsync();   // other endpoints keep the global limit
+        (await other.GetAsync("/api/employees")).StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
 

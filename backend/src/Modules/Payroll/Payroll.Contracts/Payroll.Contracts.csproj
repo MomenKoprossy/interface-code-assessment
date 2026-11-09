@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The Payroll module's public API for other modules: its permission names (granted to roles by Identity). -->
+  <PropertyGroup>
+    <RootNamespace>Payroll.Contracts</RootNamespace>
+  </PropertyGroup>
+
+</Project>

@@ -22,7 +22,8 @@ template and are vendored here as readable source.
 │ Modules       │ Employees                    │ Payroll                      │ Identity                            │
 │ (business)    │  Employees        (core)     │  Payroll         (core)      │  Identity         (core)            │
 │               │  Employees.Contracts (API)◀──┼── uses contract only         │  Identity.Infrastructure            │
-│               │  Employees.Infrastructure    │  Payroll.Infrastructure      │                                     │
+│               │  Employees.Infrastructure    │  Payroll.Contracts (perms)   │                                     │
+│               │                              │  Payroll.Infrastructure      │                                     │
 ├───────────────┴──────────────────────────────┴──────────────────────────────┴─────────────────────────────────────┤
 │ Platform: BuildingBlocks.Core · BuildingBlocks.Data · BuildingBlocks.Web  (+ ServiceDefaults, AppHost)              │
 │ Growth path, vendored but not wired: .Messaging (Rebus + outbox) · .Grpc · .Storage · .Caching (HybridCache/Redis) │
@@ -95,11 +96,11 @@ No try/catch in handlers or endpoints.
 | Validation | FluentValidation validators in module cores, run by the mediator `ValidationBehavior` → 400 ProblemDetails with camelCase field paths |
 | Error format | RFC 7807 ProblemDetails everywhere (BuildingBlocks.Web): `type,title,status,detail,traceId,errors?` |
 | AuthN | JWT bearer (HS256, key from env), issued by the Identity module |
-| AuthZ | Permission claims + `RequirePermission(...)` (BuildingBlocks.Web), plus a resource rule in Payroll (an Employee may read only their own payslip), all enforced server-side |
+| AuthZ | Permission claims + `RequirePermission(...)` (BuildingBlocks.Web), plus a resource rule in Payroll (an Employee may read only their own payslip), all enforced server-side. Permission names live in the owning module's `*.Contracts` (`EmployeePermissions`, `PayrollPermissions`), so Identity's role map can't drift from what endpoints check. An integration test asserts every `/api` endpoint except login declares authorization |
 | Time | `IClock` everywhere; never `DateTime.UtcNow` in logic (hire-date and payroll tests pin the clock) |
 | Logging | Structured logging (OpenTelemetry logs, JSON console in containers), HTTP logging (metadata only), mediator request timing |
 | Health | `/health` (readiness, includes DB) and `/alive` (liveness) |
-| API docs | OpenAPI document at `/openapi/v1.json` + Swagger UI at `/swagger` (Bearer auth scheme) |
+| API docs | OpenAPI document at `/openapi/v1.json` + Swagger UI at `/swagger` (Bearer auth scheme); served in Development or when `OpenApi:Enabled=true` |
 | Config & secrets | `appsettings.json` holds only non-secret config (payroll policy). Secrets come from env vars / user-secrets; `.env.example` is committed and `.env` is gitignored |
 
 ## 7. Frontend

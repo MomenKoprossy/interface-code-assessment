@@ -1,18 +1,16 @@
+using Employees.Contracts;
+using Payroll.Contracts;
+
 namespace Identity.Domain;
 
-public static class Permissions
-{
-    public const string EmployeesRead = "employees.read";
-    public const string EmployeesWrite = "employees.write";
-    public const string PayrollReadAll = "payroll.read.all";
-    public const string PayrollReadOwn = "payroll.read.own";
-}
-
-/// <summary>The fixed role → permission map (ADR-008). Permissions travel in the JWT as repeated <c>permission</c> claims.</summary>
+/// <summary>
+/// The fixed role → permission map (ADR-008). Permissions travel in the JWT as repeated <c>permission</c> claims.
+/// Permission names are owned by the modules that enforce them (their <c>*.Contracts</c>), so they can't drift.
+/// </summary>
 public static class RolePermissions
 {
-    private static readonly string[] Hr = [Permissions.EmployeesRead, Permissions.EmployeesWrite, Permissions.PayrollReadAll];
-    private static readonly string[] Employee = [Permissions.PayrollReadOwn];
+    private static readonly string[] Hr = [EmployeePermissions.Read, EmployeePermissions.Write, PayrollPermissions.ReadAll];
+    private static readonly string[] Employee = [PayrollPermissions.ReadOwn];
 
     public static IReadOnlyList<string> For(Role role) => role switch
     {

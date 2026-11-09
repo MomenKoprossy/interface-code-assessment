@@ -1,6 +1,7 @@
 using BuildingBlocks.Abstractions;
 using BuildingBlocks.Application;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -25,7 +26,11 @@ public static class PlatformRegistration
 
         var services = builder.Services;
 
-        services.AddProblemDetails();
+        // Every ProblemDetails gets a "type": ASP.NET only fills it for well-known codes, not e.g. 429.
+        services.AddProblemDetails(options => options.CustomizeProblemDetails = context =>
+            context.ProblemDetails.Type ??= context.ProblemDetails.Status == StatusCodes.Status429TooManyRequests
+                ? "https://tools.ietf.org/html/rfc6585#section-4"
+                : "about:blank");
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddPlatformMediator(options.HandlerAssemblies.ToArray());
         services.AddHttpContextAccessor();

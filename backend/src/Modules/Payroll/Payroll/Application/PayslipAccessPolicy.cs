@@ -1,4 +1,6 @@
 using BuildingBlocks.Abstractions;
+using Employees.Contracts;
+using Payroll.Contracts;
 
 namespace Payroll.Application;
 
@@ -8,17 +10,13 @@ namespace Payroll.Application;
 /// </summary>
 public sealed class PayslipAccessPolicy(ICurrentUser currentUser)
 {
-    public const string ReadAllPermission = "payroll.read.all";
-    public const string ReadOwnPermission = "payroll.read.own";
-    public const string EmployeeIdClaim = "employee_id";
-
     public Result EnsureCanRead(Guid employeeId)
     {
-        if (currentUser.HasPermission(ReadAllPermission))
+        if (currentUser.HasPermission(PayrollPermissions.ReadAll))
             return Result.Success();
 
-        var isOwnPayslip = currentUser.HasPermission(ReadOwnPermission)
-            && Guid.TryParse(currentUser.FindClaim(EmployeeIdClaim), out var ownEmployeeId)
+        var isOwnPayslip = currentUser.HasPermission(PayrollPermissions.ReadOwn)
+            && Guid.TryParse(currentUser.FindClaim(EmployeeClaimTypes.EmployeeId), out var ownEmployeeId)
             && ownEmployeeId == employeeId;
 
         return isOwnPayslip
