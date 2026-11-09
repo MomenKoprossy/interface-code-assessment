@@ -19,15 +19,18 @@ namespace BuildingBlocks.Web;
 /// </summary>
 public static class SecurityRegistration
 {
-    /// <summary>Default global rate-limit window: 100 requests / 10s per partition.</summary>
-    private const int PermitLimit = 100;
-    private static readonly TimeSpan Window = TimeSpan.FromSeconds(10);
+    /// <summary>Default global rate-limit window: 100 requests / 10s per client IP (overridable via the <c>RateLimiting</c> section).</summary>
+    private const int DefaultPermitLimit = 100;
+    private const int DefaultWindowSeconds = 10;
 
     public static IServiceCollection AddPlatformSecurity(this IServiceCollection services, IConfiguration configuration)
     {
         AddJwtAuthentication(services, configuration);
         AddPermissionAuthorization(services);
-        AddRateLimiting(services);
+        AddRateLimiting(
+            services,
+            configuration.GetValue("RateLimiting:PermitLimit", DefaultPermitLimit),
+            TimeSpan.FromSeconds(configuration.GetValue("RateLimiting:WindowSeconds", DefaultWindowSeconds)));
         AddSecurityHeaders(services);
         return services;
     }
@@ -64,7 +67,7 @@ public static class SecurityRegistration
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
     }
 
-    private static void AddRateLimiting(IServiceCollection services) =>
+    private static void AddRateLimiting(IServiceCollection services, int permitLimit, TimeSpan window) =>
         services.AddRateLimiter(options =>
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -73,8 +76,8 @@ public static class SecurityRegistration
                     partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = PermitLimit,
-                        Window = Window,
+                        PermitLimit = permitLimit,
+                        Window = window,
                         QueueLimit = 0,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                     }));
