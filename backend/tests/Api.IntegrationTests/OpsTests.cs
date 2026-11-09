@@ -1,6 +1,9 @@
 using System.Net;
 using System.Text.Json;
 using AwesomeAssertions;
+using EmployeePayroll.Api.Persistence;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.IntegrationTests;
 
@@ -56,4 +59,18 @@ public sealed class OpsTests(ApiFactory api)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Content.Headers.ContentType!.MediaType.Should().Be("text/html");
     }
+
+    // `dotnet ef migrations add` builds the model from DesignTimeAppDbContextFactory's hard-coded module list; a module
+    // missing there would silently drop its tables from the next migration.
+    [Fact]
+    public void Design_time_model_equals_the_runtime_model()
+    {
+        using var scope = api.Services.CreateScope();
+        using var designTime = new DesignTimeAppDbContextFactory().CreateDbContext([]);
+
+        Tables(designTime).Should().Equal(Tables(scope.ServiceProvider.GetRequiredService<AppDbContext>()));
+    }
+
+    private static List<string> Tables(DbContext db) =>
+        db.Model.GetEntityTypes().Select(e => $"{e.GetSchema()}.{e.GetTableName()} <- {e.Name}").Order().ToList();
 }

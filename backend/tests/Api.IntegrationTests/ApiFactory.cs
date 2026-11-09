@@ -1,7 +1,10 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using BuildingBlocks.Abstractions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 
 [assembly: AssemblyFixture(typeof(Api.IntegrationTests.ApiFactory))]
@@ -18,6 +21,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public const string HrEmail = "hr@acme.test";
     public const string SaraEmail = "sara.ahmed@acme.test";
     public const string OmarEmail = "omar.hassan@acme.test";
+
+    /// <summary>
+    /// The API's clock is pinned to the run's start, so "today" cannot change mid-run (midnight UTC). It must be the
+    /// real start time: JWTs take iat/exp from this clock while JwtBearer validates them against real time.
+    /// </summary>
+    public static readonly DateTime StartedUtc = DateTime.UtcNow;
+    public static DateOnly Today => DateOnly.FromDateTime(StartedUtc);
 
     private const string JwtTestKey = "integration-tests-only-signing-key-0123456789abcdef0123456789ab"; // 64 chars
 
@@ -40,6 +50,14 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Seed:DemoPassword", DemoPassword);
         // The platform limiter partitions by client IP and every TestServer request shares one partition.
         builder.UseSetting("RateLimiting:PermitLimit", "100000");
+        builder.UseSetting("RateLimiting:LoginPermitLimit", "100000");
+        builder.UseSetting("OpenApi:Enabled", "true");
+        builder.ConfigureTestServices(services => services.AddSingleton<IClock, PinnedClock>());
+    }
+
+    private sealed class PinnedClock : IClock
+    {
+        public DateTime UtcNow => StartedUtc;
     }
 
     public override async ValueTask DisposeAsync()
