@@ -21,6 +21,8 @@ export class ApiError extends Error {
   }
 }
 
+const TOO_MANY_REQUESTS = 'Too many requests. Please wait a moment and try again.';
+
 const defaultTitles: Record<number, string> = {
   400: 'Validation failed',
   401: 'Your session has expired. Please sign in again.',
@@ -28,7 +30,7 @@ const defaultTitles: Record<number, string> = {
   404: 'Not found',
   409: 'Conflict',
   422: 'This request cannot be processed.',
-  429: 'Too many requests. Please wait a moment and try again.',
+  429: TOO_MANY_REQUESTS,
 };
 
 function asString(value: unknown): string | undefined {
@@ -45,12 +47,33 @@ function asFieldErrors(value: unknown): FieldErrors {
   return result;
 }
 
-/** Builds an ApiError from a non-2xx response body. The body may be ProblemDetails, other JSON, or nothing at all. */
-export function toApiError(status: number, body: unknown): ApiError {
+/** Retry-After is either delta-seconds or an HTTP date (RFC 9110 §10.2.3); anything unusable yields undefined. */
+function retryAfterSeconds(header: string | null | undefined): number | undefined {
+  const value = header?.trim();
+  if (!value) return undefined;
+  const seconds = /^\d+$/.test(value) ? Number(value) : Math.ceil((Date.parse(value) - Date.now()) / 1000);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : undefined;
+}
+
+/** A 429's title from the server is the bare reason phrase, so ours always wins, with the wait when the server gave one. */
+function tooManyRequestsTitle(retryAfter: string | null | undefined): string {
+  const seconds = retryAfterSeconds(retryAfter);
+  if (seconds === undefined) return TOO_MANY_REQUESTS;
+  return `Too many requests. Try again in ${seconds} ${seconds === 1 ? 'second' : 'seconds'}.`;
+}
+
+/**
+ * Builds an ApiError from a non-2xx response body. The body may be ProblemDetails, other JSON, or nothing at all.
+ * The server's title wins over our defaults (a login 401 carries 'Invalid email or password.'), except on 429.
+ */
+export function toApiError(status: number, body: unknown, retryAfter?: string | null): ApiError {
   const problem = typeof body === 'object' && body !== null ? (body as Record<string, unknown>) : {};
   return new ApiError({
     status,
-    title: asString(problem.title) ?? defaultTitles[status] ?? 'Something went wrong. Please try again.',
+    title:
+      status === 429
+        ? tooManyRequestsTitle(retryAfter)
+        : (asString(problem.title) ?? defaultTitles[status] ?? 'Something went wrong. Please try again.'),
     detail: asString(problem.detail),
     fieldErrors: asFieldErrors(problem.errors),
     traceId: asString(problem.traceId),
