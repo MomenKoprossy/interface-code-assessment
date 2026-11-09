@@ -81,11 +81,17 @@ The calculator runs an **ordered list of `IPayrollRule`s** over a `PayslipDraft`
 3. `IncomeTaxRule`: progressive brackets over taxable income
 4. `OtherDeductionsRule`: the employee's recurring deductions
 
-Each rule only reads earlier results and writes its own lines. **Adding a deduction type** (pension, health
-insurance, union dues) means one new class implementing `IPayrollRule` plus registering it with an order. The
-calculator and the other rules stay unchanged (Open/Closed). Tax rules are data (config), so changing brackets is a
-config change, not a code change. A future per-country policy is a different `PayrollPolicy` instance, selected
-per employee.
+Each rule reads earlier results from the draft and adds its own lines. Precisely what is open and what isn't:
+
+- **A new post-tax deduction** (pension, health insurance, union dues) is **one class** implementing `IPayrollRule` that
+  *appends* a `PayItem` to the draft's other-deductions (and its total), plus **one registration line** in
+  `PayrollModule.cs`, where the registration order is the pipeline order. The calculator, the other rules, the totals and
+  the payslip shape don't change: the new line appears under "other deductions" and in `totalDeductions`/`netPay`.
+  A unit test registers a test-only `PensionRule` to prove this.
+- **Tax rules are data**: changing brackets, rates or the SI cap is a config change, validated at startup.
+- **Not open without touching the shape:** a new *pre-tax* deduction, or a new top-level payslip section. Those need a new
+  field on `PayslipDraft` and the `Payslip` contract (a deliberate API change).
+- A future per-country policy is a different `PayrollPolicy` instance, selected per employee.
 
 ## Assumptions
 
@@ -93,3 +99,8 @@ per employee.
 - Monthly payroll. Brackets are monthly, not annual.
 - Allowances are fixed monthly amounts and fully taxable. "Other deductions" are post-tax recurring deductions.
 - Payslips are computed on demand and not stored (no payroll run, locking or history). That's a known limitation.
+  Consequence: **any month, including past months, is computed from the employee's current salary, allowances and
+  deductions and the policy configured now.** Changing config or pay data changes past payslips until `PayrollRun`
+  snapshots exist (see `scalability.md`).
+- The policy's own amounts (`MonthlyCap`, bracket `UpTo`) must have at most 2 decimals (validated at startup), and every
+  policy key is required. A missing key fails startup instead of silently becoming 0 or `false`.

@@ -24,8 +24,8 @@ binaries, and our error handling and architecture scores depend on that code. Th
 exist for future use, but the brief says every library must be justified.
 
 **Decision.** All six blocks are copied as source under `backend/src/BuildingBlocks` with `ProjectReference`s. The app
-references Core, Data and Web. Messaging, Grpc and Storage build and test in their own `BuildingBlocks.slnx` and are not
-part of the app's dependency graph. The packaging and local feed are removed.
+references Core, Data and Web. Messaging, Grpc, Storage and Caching (split out of Data in review round 1) build and test in
+their own `BuildingBlocks.slnx` and are not part of the app's dependency graph. The packaging and local feed are removed.
 
 **Consequences.** Every line that runs is readable in the repo. The growth-path blocks are visible, compiled and tested,
 with zero runtime footprint. Changes to blocks done for this app (below) are recorded in `.claude/process/`.
@@ -45,9 +45,10 @@ only the core project, so they can't touch a database.
 
 **Decision.** One context in the Api host. Modules register `IModuleModelConfiguration`, own a schema, and migrations live in the Api.
 
-**Consequences.** Simple migrations and one connection. The trade-off: splitting a module out later needs its own context
-(documented upgrade). Chosen over per-module contexts because `AddPlatformRepositories<TContext>` binds the generic
-repository to one context, and a second context would need a keyed-repository redesign that buys nothing at this size.
+**Consequences.** Simple migrations, one connection, and one unit of work across modules. The trade-off: splitting a module out
+later needs its own context (documented upgrade). Chosen over per-module contexts because `AddPlatformRepositories<TContext>`
+binds `IUnitOfWork` (and the generic repository) to one context, and several contexts would need a keyed redesign that buys
+nothing at this size.
 
 ## ADR-005: Result + ProblemDetails for errors, no try/catch in handlers
 
@@ -69,7 +70,7 @@ pipeline. Unexpected exceptions go to one `IExceptionHandler`.
 validated `Payroll` options. The calculator is a pure function of (policy, employee profile, month), and payslips are not
 persisted.
 
-**Consequences.** It's trivially unit-testable and open for new deduction types. No payroll history (documented limitation).
+**Consequences.** It's trivially unit-testable. A new *post-tax* deduction type is one rule class plus one registration line (a unit test proves it with a `PensionRule`). A pre-tax deduction or a new payslip section needs a draft/contract field. There's no payroll history: past months are recomputed from current data (documented limitation).
 
 ## ADR-007: Money as `decimal`, line-item rounding half away from zero
 

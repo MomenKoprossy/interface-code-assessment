@@ -26,7 +26,7 @@ frontend/src/
   main.tsx, App.tsx            routes + providers
   api/
     http.ts                    fetch wrapper: base URL, Bearer token, JSON, ProblemDetails → ApiError
-    problem.ts                 ApiError type + helpers (fieldErrors(), isStatus())
+    problem.ts                 ApiError type (status, title, detail, fieldErrors, traceId) + helpers
     types.ts                   DTO types copied from .claude/docs/api-contract.md
     employees.ts, payroll.ts, auth.ts   typed endpoint functions
   features/

@@ -25,7 +25,7 @@ template and are vendored here as readable source.
 │               │  Employees.Infrastructure    │  Payroll.Infrastructure      │                                     │
 ├───────────────┴──────────────────────────────┴──────────────────────────────┴─────────────────────────────────────┤
 │ Platform: BuildingBlocks.Core · BuildingBlocks.Data · BuildingBlocks.Web  (+ ServiceDefaults, AppHost)              │
-│ Growth path, vendored but not wired: BuildingBlocks.Messaging (Rebus + transactional outbox) · .Grpc · .Storage     │
+│ Growth path, vendored but not wired: .Messaging (Rebus + outbox) · .Grpc · .Storage · .Caching (HybridCache/Redis) │
 └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
                                          PostgreSQL — one database, one schema per module
 ```
@@ -77,11 +77,14 @@ No try/catch in handlers or endpoints.
 - PostgreSQL via EF Core 10 (Npgsql). **One `AppDbContext`** in the Api host; each module contributes its
   mappings through `IModuleModelConfiguration` and owns a **schema** (`employees`, `identity`). Payroll has no
   tables: payslips are computed on demand.
-- Generic `IRepository<T,TId>` / `IUnitOfWork` from BuildingBlocks; module-specific query needs (search, email
-  uniqueness) get a module port (`IEmployeeRepository`) implemented in Infrastructure, so handlers never touch
-  `IQueryable` + EF async operators.
+- Each module defines its **own repository port** in its Application layer (`IEmployeeRepository`, `IUserRepository`),
+  implemented with EF in that module's Infrastructure. Only `IUnitOfWork` comes from BuildingBlocks. Handlers never touch
+  `IQueryable` or EF async operators. (BuildingBlocks also offers a generic `IRepository<T,TId>`; it's available but
+  today's modules don't need it.)
 - Audit stamping + soft delete are inherited from `AppDbContextBase` (`IAuditable`, `ISoftDeletable`).
-  Email uniqueness is a **filtered unique index** on the normalized email `WHERE is_deleted = false`.
+  Email uniqueness is a **filtered unique index** `ux_employees_email` on the normalized email `WHERE "IsDeleted" = false`
+  (columns use EF's default PascalCase names). Pay items are JSON complex collections (`jsonb`) inside the employee row,
+  so a soft delete never cascades to them.
 - Migrations live in the Api project (single context). Applied at startup, then seeders run (`IDataSeeder`, ordered).
 - Money columns are `numeric(18,2)`.
 

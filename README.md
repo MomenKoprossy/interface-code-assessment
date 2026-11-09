@@ -53,7 +53,7 @@ frontend (React/TS/SCSS) ──/api──▶ Api host (composition root only)
                                      ├─ Employees module   core │ contracts │ infrastructure
                                      ├─ Payroll module     core │ infrastructure ── uses Employees.Contracts only
                                      ├─ Identity module    core │ infrastructure
-                                     └─ BuildingBlocks: Core · Data · Web  (+ Messaging · Grpc · Storage, vendored for growth)
+                                     └─ BuildingBlocks: Core · Data · Web  (+ Messaging · Grpc · Storage · Caching, vendored for growth)
                                    PostgreSQL: one database, one schema per module
 ```
 
@@ -90,7 +90,8 @@ payroll spec: [`.claude/docs/payroll-rules.md`](.claude/docs/payroll-rules.md) �
 
 ## Known limitations / next steps
 
-- Payslips are computed on demand, not stored. Next: a `PayrollRun` aggregate with immutable payslip snapshots.
+- Payslips are computed on demand, not stored, so **any month (including past ones) uses today's salary data and today's
+  policy**. Next: a `PayrollRun` aggregate with immutable payslip snapshots.
 - No refresh tokens, and the token lives in sessionStorage. Next: the template's BFF pattern (HttpOnly cookie,
   server-held JWT, refresh tokens).
 - Search uses `ILIKE`. Next: a `pg_trgm` index for large tables. Pagination is offset-based.
