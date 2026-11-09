@@ -1,5 +1,10 @@
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Payroll.Application;
+using Payroll.Domain;
+using Payroll.Domain.Rules;
 
 namespace Payroll.Infrastructure;
 
@@ -8,14 +13,24 @@ public static class PayrollModule
 {
     public static IHostApplicationBuilder AddPayrollModule(this IHostApplicationBuilder builder)
     {
-        // SCAFFOLD: build:payroll binds + validates the Payroll options (ValidateOnStart) and registers the
-        // policy provider, the calculator and the ordered IPayrollRule pipeline here.
+        var services = builder.Services;
+
+        services.AddOptions<PayrollOptions>()
+            .Bind(builder.Configuration.GetSection(PayrollOptions.SectionName))
+            .ValidateOnStart();
+        services.AddSingleton<IValidateOptions<PayrollOptions>, PayrollOptionsValidator>();
+        services.AddSingleton<IPayrollPolicyProvider, ConfiguredPayrollPolicyProvider>();
+
+        // Pipeline order = registration order. A new deduction type is one more line here.
+        services.AddSingleton<IPayrollRule, GrossEarningsRule>();
+        services.AddSingleton<IPayrollRule, SocialInsuranceRule>();
+        services.AddSingleton<IPayrollRule, IncomeTaxRule>();
+        services.AddSingleton<IPayrollRule, OtherDeductionsRule>();
+        services.AddSingleton<PayrollCalculator>();
+
+        services.AddScoped<PayslipAccessPolicy>();
         return builder;
     }
 
-    public static IEndpointRouteBuilder MapPayrollEndpoints(this IEndpointRouteBuilder api)
-    {
-        // SCAFFOLD: build:payroll maps /employees/{id}/payslip and /payroll/policy here.
-        return api;
-    }
+    public static IEndpointRouteBuilder MapPayrollEndpoints(this IEndpointRouteBuilder api) => PayrollEndpoints.Map(api);
 }
