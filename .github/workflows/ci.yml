@@ -52,7 +52,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Placeholder values only: the images are built, never run, so compose just needs every required variable set.
-      - run: cp .env.example .env
+      # The images are built, never run, so compose just needs every required variable set: fill the secrets that
+      # .env.example leaves empty (JWT_KEY always) with throwaway random values.
+      - name: Create .env
+        run: |
+          cp .env.example .env
+          sed -i             -e "s|^JWT_KEY=$|JWT_KEY=$(openssl rand -base64 48)|"             -e "s|^POSTGRES_PASSWORD=$|POSTGRES_PASSWORD=$(openssl rand -hex 16)|"             -e "s|^DEMO_PASSWORD=$|DEMO_PASSWORD=$(openssl rand -hex 16)|"             .env
       - run: docker compose config --quiet
       - run: docker compose build
