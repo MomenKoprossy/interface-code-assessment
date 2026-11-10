@@ -8,14 +8,27 @@
   border-spacing: 0;
   overflow: hidden;
 
+  // Tight inner gutters (16px between columns) so all seven employee columns fit from 900px up.
   th,
   td {
-    padding: $space-2 + $space-1 $space-3;
+    padding: $space-2 + $space-1 $space-2;
     text-align: left;
     vertical-align: middle;
   }
 
+  // Outer gutters line up with the cards above the table.
+  th:first-child,
+  td:first-child {
+    padding-left: $space-3;
+  }
+
+  th:last-child,
+  td:last-child {
+    padding-right: $space-3;
+  }
+
   thead th {
+    white-space: nowrap;
     background: $color-surface-alt;
     border-bottom: 1px solid $color-border;
     font-size: $font-size-sm;
@@ -35,6 +48,11 @@
 
   &__number {
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  &__nowrap {
+    white-space: nowrap;
   }
 
   &__primary {
@@ -46,12 +64,11 @@
     display: block;
     font-size: $font-size-sm;
     color: $color-text-muted;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   &__actions {
     display: flex;
-    flex-wrap: wrap;
     justify-content: flex-end;
     gap: $space-1;
   }
@@ -64,7 +81,7 @@
   }
 
   // Narrow screens: every row becomes a card, each cell labelled from data-label.
-  @include below($breakpoint-sm) {
+  @include below($breakpoint-md) {
     border: 0;
     background: transparent;
 
@@ -95,8 +112,8 @@
       padding: $space-1 $space-3;
       text-align: right;
 
-      // An unlabelled cell (the name) is the card's heading rather than a label/value pair.
-      &:not([data-label], .data-table__actions) {
+      // Unlabelled cells (the name heading, the actions) are blocks rather than label/value pairs.
+      &:not([data-label]) {
         display: block;
         text-align: left;
       }
@@ -110,9 +127,13 @@
       }
     }
 
-    .data-table__actions {
-      justify-content: flex-start;
+    .data-table__actions-cell {
       padding-top: $space-2;
+    }
+
+    .data-table__actions {
+      flex-wrap: wrap;
+      justify-content: flex-start;
     }
   }
 }

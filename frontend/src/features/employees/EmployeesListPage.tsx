@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { getPayrollPolicy } from '../../api/payroll';
 import { errorMessage } from '../../api/problem';
 import type { EmployeeListItem } from '../../api/types';
 import { Alert } from '../../shared/components/Alert';
@@ -10,6 +11,7 @@ import { SelectField } from '../../shared/components/SelectField';
 import { Spinner } from '../../shared/components/Spinner';
 import { TextField } from '../../shared/components/TextField';
 import { formatDate, formatMoney } from '../../shared/format';
+import { useAsync } from '../../shared/useAsync';
 import { DeleteEmployeeDialog, type DeleteOutcome } from './DeleteEmployeeDialog';
 import { parseListQuery, updateListParams, useDepartments, useEmployees } from './useEmployees';
 
@@ -26,6 +28,8 @@ export function EmployeesListPage() {
   const query = parseListQuery(params);
   const employees = useEmployees(query);
   const departments = useDepartments();
+  // async wrapper: other pages' tests auto-mock api/payroll, where getPayrollPolicy returns undefined, not a promise.
+  const policy = useAsync('payroll-policy', async (signal) => getPayrollPolicy(signal));
   const location = useLocation();
   const navigate = useNavigate();
   const [notice, setNotice] = useState<string | null>((location.state as { notice?: string } | null)?.notice ?? null);
@@ -51,6 +55,11 @@ export function EmployeesListPage() {
     if (notice) noticeRef.current?.focus();
   }, [notice]);
 
+  // The debounced write runs after later renders; setParams' updater would see this render's stale params.
+  const paramsRef = useRef(params);
+  useEffect(() => {
+    paramsRef.current = params;
+  }, [params]);
   const debounceTimer = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(debounceTimer.current), []);
 
@@ -59,7 +68,7 @@ export function EmployeesListPage() {
     setNotice(null);
     window.clearTimeout(debounceTimer.current);
     debounceTimer.current = window.setTimeout(
-      () => setParams((current) => updateListParams(current, { search: value.trim() })),
+      () => setParams(() => updateListParams(paramsRef.current, { search: value.trim() })),
       SEARCH_DEBOUNCE_MS,
     );
   }
@@ -79,6 +88,7 @@ export function EmployeesListPage() {
     setNotice(outcome === 'deleted' ? `${name} was deleted.` : `${name} was already deleted.`);
     setToDelete(null);
     employees.reload();
+    departments.reload();
   }
 
   const departmentOptions = [
@@ -104,7 +114,7 @@ export function EmployeesListPage() {
       />
 
       {notice && (
-        <div ref={noticeRef} tabIndex={-1}>
+        <div ref={noticeRef} tabIndex={-1} className="notice">
           <Alert tone="success">{notice}</Alert>
         </div>
       )}
@@ -164,7 +174,12 @@ export function EmployeesListPage() {
 
       {result && result.items.length > 0 && (
         <>
-          <EmployeeTable items={result.items} busy={employees.loading} onDelete={setToDelete} />
+          <EmployeeTable
+            items={result.items}
+            busy={employees.loading}
+            currency={policy.data?.currency}
+            onDelete={setToDelete}
+          />
           <Pagination page={result.page} totalPages={result.totalPages} onPageChange={goToPage} />
         </>
       )}
@@ -179,10 +194,11 @@ export function EmployeesListPage() {
 interface EmployeeTableProps {
   items: EmployeeListItem[];
   busy: boolean;
+  currency?: string;
   onDelete: (employee: EmployeeListItem) => void;
 }
 
-function EmployeeTable({ items, busy, onDelete }: EmployeeTableProps) {
+function EmployeeTable({ items, busy, currency, onDelete }: EmployeeTableProps) {
   // The edit and payslip pages link back to the list with its filters and page intact.
   const from = useLocation().search;
   return (
@@ -208,37 +224,54 @@ function EmployeeTable({ items, busy, onDelete }: EmployeeTableProps) {
           <tr key={employee.id}>
             <td>
               <span className="data-table__primary">{employee.fullName}</span>
-              <span className="data-table__secondary">{employee.email}</span>
+              <span className="data-table__secondary">
+                {/* Line-break opportunities before "@" and ".", so a long email wraps there, never mid-word. */}
+                {employee.email.split(/(?=[@.])/).map((part, i) => (
+                  <Fragment key={i}>
+                    {i > 0 && <wbr />}
+                    {part}
+                  </Fragment>
+                ))}
+              </span>
             </td>
             <td data-label="Job title">{employee.jobTitle}</td>
             <td data-label="Department">{employee.department}</td>
-            <td data-label="Hire date">{formatDate(employee.hireDate)}</td>
+            <td data-label="Hire date" className="data-table__nowrap">
+              {formatDate(employee.hireDate)}
+            </td>
             <td data-label="Base salary" className="data-table__number">
-              {formatMoney(employee.baseMonthlySalary)}
+              {formatMoney(employee.baseMonthlySalary, currency)}
             </td>
             <td data-label="Status">
               <StatusBadge status={employee.status} />
             </td>
-            <td className="data-table__actions">
-              <Link
-                to={`/employees/${employee.id}/edit`}
-                state={{ from }}
-                className={buttonClass('secondary', true)}
-                aria-label={`Edit ${employee.fullName}`}
-              >
-                Edit
-              </Link>
-              <Link
-                to={`/employees/${employee.id}/payslip`}
-                state={{ from }}
-                className={buttonClass('secondary', true)}
-                aria-label={`Payslip for ${employee.fullName}`}
-              >
-                Payslip
-              </Link>
-              <Button variant="ghost" small onClick={() => onDelete(employee)} aria-label={`Delete ${employee.fullName}`}>
-                Delete
-              </Button>
+            <td className="data-table__actions-cell">
+              <div className="data-table__actions">
+                <Link
+                  to={`/employees/${employee.id}/edit`}
+                  state={{ from }}
+                  className={buttonClass('secondary', true)}
+                  aria-label={`Edit ${employee.fullName}`}
+                >
+                  Edit
+                </Link>
+                <Link
+                  to={`/employees/${employee.id}/payslip`}
+                  state={{ from, name: employee.fullName }}
+                  className={buttonClass('secondary', true)}
+                  aria-label={`Payslip for ${employee.fullName}`}
+                >
+                  Payslip
+                </Link>
+                <Button
+                  variant="ghost"
+                  small
+                  onClick={() => onDelete(employee)}
+                  aria-label={`Delete ${employee.fullName}`}
+                >
+                  Delete
+                </Button>
+              </div>
             </td>
           </tr>
         ))}
