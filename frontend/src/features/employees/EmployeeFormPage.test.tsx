@@ -45,9 +45,9 @@ describe('EmployeeFormPage', () => {
     renderApp(<App />, '/employees/e1/edit');
 
     expect(await screen.findByLabelText(/full name/i)).toHaveValue('Ada Lovelace');
-    expect(screen.getByLabelText('Allowance 1 name')).toHaveValue('Housing');
-    expect(screen.getByLabelText('Allowance 1 amount')).toHaveValue('500');
-    expect(screen.getByText('Amount (monthly)')).toBeVisible();
+    expect(screen.getByRole('textbox', { name: 'Allowance 1 name' })).toHaveValue('Housing');
+    expect(screen.getByRole('textbox', { name: 'Allowance 1 amount' })).toHaveValue('500.00');
+    expect(screen.getByText(/Amount \(monthly\)/)).toBeVisible();
     expect(api.getEmployee).toHaveBeenCalledWith('e1', expect.any(AbortSignal));
     await waitFor(() => expect(document.title).toBe('Edit Ada Lovelace · Employee Payroll'));
   });

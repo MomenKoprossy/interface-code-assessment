@@ -63,8 +63,8 @@ describe('EmployeeForm', () => {
     const { user, onSubmit } = renderForm();
     await fillValidForm(user);
     await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
-    await user.type(screen.getByLabelText('Allowance 1 name'), ' Housing ');
-    await user.type(screen.getByLabelText('Allowance 1 amount'), '250.50');
+    await user.type(screen.getByRole('textbox', { name: 'Allowance 1 name' }), ' Housing ');
+    await user.type(screen.getByRole('textbox', { name: 'Allowance 1 amount' }), '250.50');
 
     await user.click(screen.getByRole('button', { name: 'Add employee' }));
 
@@ -109,12 +109,12 @@ describe('EmployeeForm', () => {
     const { user } = renderForm(onSubmit);
     await fillValidForm(user);
     await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
-    await user.type(screen.getByLabelText('Allowance 1 name'), 'Bonus');
-    await user.type(screen.getByLabelText('Allowance 1 amount'), '999999');
+    await user.type(screen.getByRole('textbox', { name: 'Allowance 1 name' }), 'Bonus');
+    await user.type(screen.getByRole('textbox', { name: 'Allowance 1 amount' }), '999999');
 
     await user.click(screen.getByRole('button', { name: 'Add employee' }));
 
-    expect(await screen.findByLabelText('Allowance 1 amount')).toHaveAccessibleDescription(
+    expect(await screen.findByRole('textbox', { name: 'Allowance 1 amount' })).toHaveAccessibleDescription(
       'Amount must be at most 1,000,000.',
     );
     const alert = screen.getByText("The employee couldn't be saved").closest('[role="alert"]');
@@ -149,14 +149,48 @@ describe('EmployeeForm', () => {
     const { user } = renderForm();
     await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
     await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
-    await user.type(screen.getByLabelText('Deduction 1 name'), 'Loan');
-    await user.click(screen.getByLabelText('Deduction 2 name'));
+    await user.type(screen.getByRole('textbox', { name: 'Deduction 1 name' }), 'Loan');
+    await user.click(screen.getByRole('textbox', { name: 'Deduction 2 name' }));
     await user.tab();
-    expect(screen.getByLabelText('Deduction 2 name')).toHaveAccessibleDescription('Name is required.');
+    expect(screen.getByRole('textbox', { name: 'Deduction 2 name' })).toHaveAccessibleDescription('Name is required.');
 
     await user.click(screen.getByRole('button', { name: 'Remove deduction 1' }));
 
-    expect(screen.getByLabelText('Deduction 1 name')).toHaveAccessibleDescription('Name is required.');
+    expect(screen.getByRole('textbox', { name: 'Deduction 1 name' })).toHaveAccessibleDescription('Name is required.');
     expect(screen.queryByLabelText('Deduction 2 name')).not.toBeInTheDocument();
+  });
+
+  it('removing a duplicate row clears the unique-name error it caused', async () => {
+    const { user } = renderForm();
+    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.type(screen.getByRole('textbox', { name: 'Allowance 1 name' }), 'Housing');
+    await user.type(screen.getByRole('textbox', { name: 'Allowance 2 name' }), 'housing');
+    await user.tab();
+    expect(screen.getByText('Name must be unique in this list.')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Remove allowance 1' }));
+
+    expect(screen.queryByText('Name must be unique in this list.')).not.toBeInTheDocument();
+  });
+
+  it('moves focus to the next Remove button, then to the Add button, after removing rows', async () => {
+    const { user } = renderForm();
+    await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
+    await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
+
+    await user.click(screen.getByRole('button', { name: 'Remove deduction 2' }));
+    expect(screen.getByRole('button', { name: 'Remove deduction 1' })).toHaveFocus();
+
+    await user.click(screen.getByRole('button', { name: 'Remove deduction 1' }));
+    expect(screen.getByRole('button', { name: '+ Add deduction' })).toHaveFocus();
+  });
+
+  it('marks item names and amounts as required', async () => {
+    const { user } = renderForm();
+    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+
+    expect(screen.getByRole('textbox', { name: 'Allowance 1 name' })).toBeRequired();
+    expect(screen.getByRole('textbox', { name: 'Allowance 1 amount' })).toBeRequired();
   });
 });
