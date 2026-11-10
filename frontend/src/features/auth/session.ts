@@ -17,6 +17,7 @@ export function loadSession(now: Date = new Date()): Session | null {
     }
     return session;
   } catch {
+    sessionStorage.removeItem(STORAGE_KEY);
     return null;
   }
 }

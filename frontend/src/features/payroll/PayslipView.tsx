@@ -63,7 +63,7 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
           <p>No tax brackets apply.</p>
         ) : (
           <div className="table-scroll">
-            <table className="data-table data-table--compact">
+            <table className="data-table data-table--compact" aria-labelledby="tax-brackets-title">
               <thead>
                 <tr>
                   <th scope="col">Bracket</th>
@@ -84,7 +84,9 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
                     <td data-label="Bracket">
                       {bracket.upTo === null
                         ? `Over ${money(bracket.from)}`
-                        : `${money(bracket.from)} – ${money(bracket.upTo)}`}
+                        : bracket.from === 0
+                          ? `Up to ${money(bracket.upTo)}`
+                          : `Over ${money(bracket.from)} up to ${money(bracket.upTo)}`}
                     </td>
                     <td data-label="Rate" className="data-table__number">
                       {formatRate(bracket.rate)}

@@ -34,7 +34,26 @@
 
     &::before {
       content: '⚠ ';
+      content: '⚠ ' / ''; // decorative: drawn but not announced
     }
+  }
+
+  &__affix {
+    position: relative;
+
+    .field__control {
+      padding-right: $space-6;
+    }
+  }
+
+  &__suffix {
+    position: absolute;
+    top: 50%;
+    right: $space-2 + $space-1;
+    transform: translateY(-50%);
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+    pointer-events: none;
   }
 
   &--invalid &__control {

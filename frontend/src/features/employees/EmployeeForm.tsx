@@ -31,6 +31,8 @@ interface EmployeeFormProps {
   onSubmit: (input: EmployeeInput) => Promise<void>;
   /** `YYYY-MM-DD` (UTC); injectable so tests don't depend on the real clock. */
   today?: string;
+  /** Shown on the money inputs; the values themselves are plain decimals. */
+  currency?: string;
 }
 
 function withError(errors: FormErrors, path: string, message: string | undefined): FormErrors {
@@ -47,6 +49,7 @@ export function EmployeeForm({
   cancelTo = '/employees',
   onSubmit,
   today = todayUtc(),
+  currency,
 }: EmployeeFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [values, setValues] = useState(initialValues);
@@ -148,7 +151,7 @@ export function EmployeeForm({
           <TextField label="Job title" required maxLength={LIMITS.textMax} {...fieldProps('jobTitle')} />
           <TextField label="Department" required maxLength={LIMITS.textMax} {...fieldProps('department')} />
           <TextField label="Hire date" type="date" required min={LIMITS.earliestHireDate} max={today} {...fieldProps('hireDate')} />
-          <MoneyField label="Base monthly salary" required {...fieldProps('baseMonthlySalary')} />
+          <MoneyField label="Base monthly salary" required suffix={currency} {...fieldProps('baseMonthlySalary')} />
           <SelectField
             label="Status"
             required
@@ -172,6 +175,7 @@ export function EmployeeForm({
           onBlur={(index, key) => blur(`${list}[${index}].${key}`)}
           onAdd={() => addItem(list)}
           onRemove={(index) => removeItem(list, index)}
+          currency={currency}
         />
       ))}
 
@@ -201,9 +205,10 @@ interface PayItemsSectionProps {
   onBlur: (index: number, key: 'name' | 'amount') => void;
   onAdd: () => void;
   onRemove: (index: number) => void;
+  currency?: string;
 }
 
-function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAdd, onRemove }: PayItemsSectionProps) {
+function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAdd, onRemove, currency }: PayItemsSectionProps) {
   const text = sectionText[list];
   const full = items.length >= LIMITS.itemsMax;
   const sectionRef = useRef<HTMLFieldSetElement>(null);
@@ -242,7 +247,6 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
         <div className="pay-item" key={item.key}>
           <TextField
             label={`${text.singular} ${index + 1} name`}
-            hideLabel
             required
             placeholder="Name"
             maxLength={LIMITS.itemNameMax}
@@ -254,8 +258,8 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
           />
           <MoneyField
             label={`${text.singular} ${index + 1} amount`}
-            hideLabel
             required
+            suffix={currency}
             value={item.amount}
             error={errors[`${list}[${index}].amount`]}
             onChange={(value) => onChange(index, 'amount', value)}

@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { createEmployee, getEmployee, updateEmployee } from '../../api/employees';
+import { getPayrollPolicy } from '../../api/payroll';
 import { errorMessage, isStatus } from '../../api/problem';
 import type { EmployeeInput } from '../../api/types';
 import { Alert } from '../../shared/components/Alert';
@@ -16,6 +17,7 @@ export function EmployeeFormPage() {
   // The list passes its search string, so back, cancel and save return to the same filters and page.
   const listUrl = `/employees${(useLocation().state as { from?: string } | null)?.from ?? ''}`;
   const existing = useAsync(id ?? null, (signal) => getEmployee(id ?? '', signal));
+  const currency = useAsync('payroll-policy', async (signal) => getPayrollPolicy(signal)).data?.currency;
 
   async function save(input: EmployeeInput) {
     const saved = id ? await updateEmployee(id, input) : await createEmployee(input);
@@ -28,7 +30,7 @@ export function EmployeeFormPage() {
     return (
       <>
         <PageHeader title="Add employee" subtitle={backLink} />
-        <EmployeeForm initialValues={emptyFormValues()} submitLabel="Add employee" cancelTo={listUrl} onSubmit={save} />
+        <EmployeeForm initialValues={emptyFormValues()} submitLabel="Add employee" cancelTo={listUrl} onSubmit={save} currency={currency} />
       </>
     );
   }
@@ -49,6 +51,7 @@ export function EmployeeFormPage() {
           submitLabel="Save changes"
           cancelTo={listUrl}
           onSubmit={save}
+          currency={currency}
         />
       )}
     </>

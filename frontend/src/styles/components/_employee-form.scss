@@ -69,10 +69,19 @@
     margin-top: $space-1;
   }
 
+  // Wide: the header row labels the columns, so each input's own label is for screen readers only.
+  // Narrow: the header is hidden and the labels show ('Allowance 1 name *').
+  @media (min-width: $breakpoint-sm) {
+    .field__label {
+      @include visually-hidden;
+    }
+  }
+
   @include below($breakpoint-sm) {
     grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
 
-    // The name takes a row of its own here, so the column labels wouldn't line up; placeholders remain.
+    // The name takes a row of its own here, so the column header wouldn't line up.
     &--header {
       display: none;
     }

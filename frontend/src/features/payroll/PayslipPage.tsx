@@ -23,8 +23,15 @@ export function PayslipPage() {
   const requested = params.get('month') ?? '';
   const month = MONTH_PATTERN.test(requested) ? requested : currentMonth();
   const payslip = usePayslip(employeeId, month);
-  // The list link passes the name so a month with no payslip (422) still says whose page this is.
-  const name = payslip.data?.employeeName ?? (typeof linkState?.name === 'string' ? linkState.name : undefined);
+  // A month with no payslip (422) still says whose page this is: the last loaded name, else the one the list link passed.
+  const [known, setKnown] = useState<{ id: string | null; name: string }>();
+  if (payslip.data && (known?.id !== employeeId || known.name !== payslip.data.employeeName)) {
+    setKnown({ id: employeeId, name: payslip.data.employeeName });
+  }
+  const name =
+    payslip.data?.employeeName ??
+    (known?.id === employeeId ? known.name : undefined) ??
+    (typeof linkState?.name === 'string' ? linkState.name : undefined);
 
   // The input keeps its own draft so a half-typed month (text fallback where there is no native picker) isn't
   // replaced on every keystroke; only a complete month reaches the URL. Back/forward still syncs the draft.

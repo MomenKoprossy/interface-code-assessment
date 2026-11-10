@@ -75,11 +75,13 @@ describe('PayslipView', () => {
 
   it('lists tax per bracket, including the open-ended top bracket', () => {
     render(<PayslipView payslip={payslip} />);
-    const table = screen.getByRole('heading', { name: 'Income tax by bracket' }).nextElementSibling as HTMLElement;
+    const table = screen.getByRole('table', { name: 'Income tax by bracket' });
     const rows = within(table).getAllByRole('row').slice(1);
 
     expect(rows).toHaveLength(4);
-    expect(rows[1]).toHaveTextContent('$1,500.00 – $5,000.00');
+    // Upper bounds are inclusive, so a bound is never repeated as the start of the next bracket.
+    expect(rows[0]).toHaveTextContent('Up to $1,500.00');
+    expect(rows[1]).toHaveTextContent('Over $1,500.00 up to $5,000.00');
     expect(rows[1]).toHaveTextContent('10%');
     expect(rows[1]).toHaveTextContent('$350.00');
     expect(rows[3]).toHaveTextContent('Over $10,000.00');
@@ -175,6 +177,29 @@ describe('PayslipPage', () => {
     renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=2019-01' });
     await screen.findByText('Employee was not yet hired in 2019-01.');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/^Payslip$/);
+  });
+
+  it("keeps the employee's name after switching to a month with no payslip", async () => {
+    signInAs('HR');
+    renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=2026-03' });
+    expect(await screen.findByRole('heading', { level: 1, name: 'Payslip: Ada Lovelace' })).toBeInTheDocument();
+
+    vi.mocked(api.getPayslip).mockRejectedValue(
+      new ApiError({ status: 422, title: 'Business rule violated', detail: 'Employee was not yet hired in 2019-01.' }),
+    );
+    fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2019-01' } });
+
+    await screen.findByText('Employee was not yet hired in 2019-01.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Payslip: Ada Lovelace');
+  });
+
+  it('treats a month the API would reject (before 1900) like any malformed month: shows the current month', async () => {
+    signInAs('HR');
+    renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=0000-01' });
+
+    await screen.findByText('$9,875.00');
+    expect(api.getPayslip).toHaveBeenLastCalledWith('emp-1', currentMonth(), expect.any(AbortSignal));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('tells an employee without an employee record that there is nothing to show', () => {

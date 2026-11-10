@@ -89,7 +89,7 @@ describe('validateHireDate', () => {
     ['today is allowed', TODAY, undefined],
     ['tomorrow is in the future', '2026-11-10', 'Hire date cannot be in the future.'],
     ['1900-01-01 is the earliest allowed', '1900-01-01', undefined],
-    ['1899-12-31 is too early', '1899-12-31', 'Hire date cannot be before 1900-01-01.'],
+    ['1899-12-31 is too early', '1899-12-31', 'Hire date cannot be before Jan 1, 1900.'],
     ['empty is required', '', 'Hire date is required.'],
     ['garbage is invalid', '15/01/2020', 'Enter a valid date.'],
   ])('%s', (_, value, expected) => {

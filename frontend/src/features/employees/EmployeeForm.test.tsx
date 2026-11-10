@@ -193,4 +193,18 @@ describe('EmployeeForm', () => {
     expect(screen.getByRole('textbox', { name: 'Allowance 1 name' })).toBeRequired();
     expect(screen.getByRole('textbox', { name: 'Allowance 1 amount' })).toBeRequired();
   });
+
+  it('shows the currency on every money input without changing their names or values', async () => {
+    renderRoute(
+      <EmployeeForm initialValues={emptyFormValues()} submitLabel="Add employee" onSubmit={vi.fn()} today={TODAY} currency="USD" />,
+    );
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+
+    for (const name of ['Base monthly salary', 'Allowance 1 amount']) {
+      const input = screen.getByRole('textbox', { name });
+      expect(input.closest('.field__affix')).toHaveTextContent('USD');
+      expect(input).toHaveValue('');
+    }
+  });
 });

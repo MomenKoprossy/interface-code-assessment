@@ -1,4 +1,5 @@
 import type { EmployeeStatus } from '../../api/types';
+import { formatDate } from '../../shared/format';
 
 // Mirrors the server's validation table in api-contract.md. The server stays the authority; this only gives
 // faster feedback. Error keys use the server's camelCase property paths so server and client errors share fields.
@@ -59,7 +60,7 @@ export function validateHireDate(value: string, today: string): string | undefin
   if (value === '') return 'Hire date is required.';
   if (!ISO_DATE_PATTERN.test(value) || Number.isNaN(Date.parse(value))) return 'Enter a valid date.';
   if (value > today) return 'Hire date cannot be in the future.';
-  if (value < LIMITS.earliestHireDate) return 'Hire date cannot be before 1900-01-01.';
+  if (value < LIMITS.earliestHireDate) return `Hire date cannot be before ${formatDate(LIMITS.earliestHireDate)}.`;
   return undefined;
 }
 
