@@ -57,6 +57,14 @@
     margin-top: $space-1;
   }
 
+  // An invisible, flat Remove button in the header row, so its last track is as wide as the item rows'.
+  &--header &__spacer {
+    visibility: hidden;
+    height: 0;
+    min-height: 0;
+    border-block-width: 0;
+  }
+
   &--header + & {
     margin-top: $space-1;
   }

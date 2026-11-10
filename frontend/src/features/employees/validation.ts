@@ -36,7 +36,7 @@ export const LIMITS = {
 } as const;
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$/;
-const MONEY_PATTERN = /^\d+(\.\d+)?$/;
+const MONEY_PATTERN = /^-?\d+(\.\d+)?$/;
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function requiredText(value: string, label: string, max: number): string | undefined {

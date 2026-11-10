@@ -5,7 +5,7 @@ import type { EmployeeFormValues, FormErrors, PayItemDraft, PayItemList } from '
 let nextKey = 0;
 export function newPayItemDraft(item?: PayItem): PayItemDraft {
   nextKey += 1;
-  return { key: `item-${nextKey}`, name: item?.name ?? '', amount: item ? String(item.amount) : '' };
+  return { key: `item-${nextKey}`, name: item?.name ?? '', amount: item ? item.amount.toFixed(2) : '' };
 }
 
 export function emptyFormValues(): EmployeeFormValues {
@@ -29,7 +29,7 @@ export function toFormValues(employee: EmployeeDetails): EmployeeFormValues {
     jobTitle: employee.jobTitle,
     department: employee.department,
     hireDate: employee.hireDate,
-    baseMonthlySalary: String(employee.baseMonthlySalary),
+    baseMonthlySalary: employee.baseMonthlySalary.toFixed(2),
     status: employee.status,
     allowances: employee.allowances.map(newPayItemDraft),
     deductions: employee.deductions.map(newPayItemDraft),

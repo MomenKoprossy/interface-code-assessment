@@ -79,8 +79,19 @@ export function EmployeeForm({
   }
 
   function removeItem(list: PayItemList, index: number) {
-    setValues({ ...values, [list]: values[list].filter((_, i) => i !== index) });
-    setErrors((current) => removeItemErrors(current, list, index));
+    const next = { ...values, [list]: values[list].filter((_, i) => i !== index) };
+    setValues(next);
+    // Re-check the rows still showing errors: removing a duplicate clears the other row's "unique" error.
+    const fresh = validateEmployee(next, today);
+    setErrors((current) => {
+      const shifted = removeItemErrors(current, list, index);
+      for (const path of Object.keys(shifted)) {
+        if (!path.startsWith(`${list}[`)) continue;
+        if (fresh[path]) shifted[path] = fresh[path];
+        else delete shifted[path];
+      }
+      return shifted;
+    });
   }
 
   function showErrors(fieldErrors: FormErrors, messages: string[]) {
@@ -195,8 +206,18 @@ interface PayItemsSectionProps {
 function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAdd, onRemove }: PayItemsSectionProps) {
   const text = sectionText[list];
   const full = items.length >= LIMITS.itemsMax;
+  const sectionRef = useRef<HTMLFieldSetElement>(null);
+  const addRef = useRef<HTMLButtonElement>(null);
+
+  /** The clicked button unmounts, so focus moves to the Remove button now in its place, or to Add when none is left. */
+  function remove(index: number) {
+    flushSync(() => onRemove(index));
+    const removes = sectionRef.current?.querySelectorAll<HTMLElement>('.pay-item__remove') ?? [];
+    (removes[Math.min(index, removes.length - 1)] ?? addRef.current)?.focus();
+  }
+
   return (
-    <fieldset className="card form-section" disabled={disabled}>
+    <fieldset ref={sectionRef} className="card form-section" disabled={disabled}>
       <legend className="form-section__title">{text.title}</legend>
       <p className="form-section__hint">{text.hint}</p>
       {errors[list] && (
@@ -208,9 +229,13 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
       {items.length > 0 && (
         // Visible column labels; each input keeps its own (screen-reader) label.
         <div className="pay-item pay-item--header" aria-hidden="true">
-          <span className="field__label">Name</span>
-          <span className="field__label">Amount (monthly)</span>
-          <span />
+          <span className="field__label">
+            Name<span aria-hidden="true"> *</span>
+          </span>
+          <span className="field__label">
+            Amount (monthly)<span aria-hidden="true"> *</span>
+          </span>
+          <span className={`${buttonClass('ghost', true)} pay-item__spacer`}>Remove</span>
         </div>
       )}
       {items.map((item, index) => (
@@ -218,6 +243,7 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
           <TextField
             label={`${text.singular} ${index + 1} name`}
             hideLabel
+            required
             placeholder="Name"
             maxLength={LIMITS.itemNameMax}
             value={item.name}
@@ -229,6 +255,7 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
           <MoneyField
             label={`${text.singular} ${index + 1} amount`}
             hideLabel
+            required
             value={item.amount}
             error={errors[`${list}[${index}].amount`]}
             onChange={(value) => onChange(index, 'amount', value)}
@@ -238,7 +265,7 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
           <Button
             variant="ghost"
             small
-            onClick={() => onRemove(index)}
+            onClick={() => remove(index)}
             className="pay-item__remove"
             aria-label={`Remove ${text.singular.toLowerCase()} ${index + 1}`}
           >
@@ -246,7 +273,7 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
           </Button>
         </div>
       ))}
-      <Button variant="secondary" small onClick={onAdd} disabled={full}>
+      <Button ref={addRef} variant="secondary" small onClick={onAdd} disabled={full}>
         + Add {text.singular.toLowerCase()}
       </Button>
       {full && <p className="form-section__hint">You can add at most {LIMITS.itemsMax}.</p>}

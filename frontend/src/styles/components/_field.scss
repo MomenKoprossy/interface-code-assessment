@@ -13,8 +13,9 @@
 
   &__control {
     width: 100%;
-    min-height: $control-height;
-    padding: $space-2 $space-2 + $space-1;
+    // A fixed height (not min-height + padding) keeps text, date, number and select controls the same size.
+    height: $control-height;
+    padding: 0 $space-2 + $space-1;
     border: 1px solid $color-control-border;
     border-radius: $radius;
     background: $color-surface;

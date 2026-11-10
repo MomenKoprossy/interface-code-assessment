@@ -39,6 +39,13 @@ describe('form <-> DTO mapping', () => {
     expect(input.allowances).toEqual([{ name: 'Housing', amount: 100.1 }]);
   });
 
+  it('shows stored money with 2 decimals', () => {
+    const values = toFormValues(employee);
+    expect(values.baseMonthlySalary).toBe('5000.50');
+    expect(values.allowances[0]?.amount).toBe('250.00');
+    expect(values.deductions[1]?.amount).toBe('30.25');
+  });
+
   it('gives every item row a unique key', () => {
     const values = toFormValues(employee);
     expect(new Set(values.deductions.map((d) => d.key)).size).toBe(2);
