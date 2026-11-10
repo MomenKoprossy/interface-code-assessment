@@ -13,14 +13,14 @@ concurrency:
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         # backend/global.json selects the SDK and the Microsoft.Testing.Platform runner; dotnet reads it from the cwd.
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: backend/global.json
       - run: dotnet restore EmployeePayroll.slnx
@@ -30,13 +30,13 @@ jobs:
       - run: dotnet test src/BuildingBlocks/BuildingBlocks.slnx -c Release
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -49,9 +49,9 @@ jobs:
 
   docker:
     needs: [backend, frontend]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Fill JWT_KEY, which .env.example leaves empty, with a throwaway random value.
       - name: Create .env
         run: |

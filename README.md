@@ -1,5 +1,7 @@
 # Employee Management & Payroll
 
+[![CI](https://github.com/MomenKoprossy/interface-code-assessment/actions/workflows/ci.yml/badge.svg)](https://github.com/MomenKoprossy/interface-code-assessment/actions/workflows/ci.yml)
+
 A small HR application: employee CRUD with validation, search and pagination, plus a configurable monthly payroll
 calculator (progressive tax brackets, capped social insurance). It has an ASP.NET Core (.NET 10) API, a React +
 TypeScript frontend with hand-written SCSS, and PostgreSQL.
@@ -44,6 +46,9 @@ dotnet test backend/EmployeePayroll.slnx                     # unit + architectu
 dotnet test backend/src/BuildingBlocks/BuildingBlocks.slnx   # the vendored platform building blocks
 cd frontend && npm test
 ```
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of the above on every push, plus lint, typecheck and
+the production build. It then builds the Docker images, brings the compose stack up and checks it through nginx.
 
 ---
 

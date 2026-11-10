@@ -116,7 +116,7 @@ public sealed class OutboxTests : IAsyncLifetime
 
         (await _dispatcher.DispatchPendingAsync(Ct)).Should().Be(0);
 
-        await _transport.ReceivedWithAnyArgs(1).PublishAsync(default!, default);
+        await _transport.ReceivedWithAnyArgs(1).PublishAsync(default!, Ct);
         var pending = await MessagesAsync();
         pending.Should().AllSatisfy(m => m.ProcessedAtUtc.Should().BeNull());
         pending[0].Error.Should().Be("broker down");

@@ -15,6 +15,13 @@ React 19 + TypeScript (strict) + Vite + **hand-written SCSS**. The goal is a sim
 | `@types/node` (dev) | types for `process.env` in `vite.config.ts` (build-time only) |
 | `@testing-library/dom` (dev) | required peer dependency of `@testing-library/react` 16 |
 
+`package.json` has two supply-chain settings and no extra packages:
+- **`overrides.minimatch: ^11.0.6`**: ESLint and typescript-eslint still ask for `minimatch` 10, which has a moderate ReDoS
+  advisory (GHSA-g3hv-75wg-m249, fixed in 11.0.1). It's dev-only and lint passes on 11. Remove the override once
+  upstream moves.
+- **`allowScripts: { "@parcel/watcher": false }`**: sass's optional file watcher ships an install script. We never use
+  `sass --watch` (Vite compiles the SCSS), so its script is denied explicitly instead of left unreviewed.
+
 **Not used, on purpose:** no UI kit, no state library (React context + hooks are enough), no form library
 (the forms are small, and the validation rules live in our own tested module), no data-fetching library (a small
 typed client + hooks), no date library (`<input type="date">` / `type="month"` and `Intl`).
