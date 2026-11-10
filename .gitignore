@@ -37,3 +37,6 @@ Interface_Code_Assessment_2026.pdf
 
 # Claude Code scheduler lock (session-local)
 .claude/scheduled_tasks.lock
+
+# playwright-cli session artifacts (snapshots/logs); curated screenshots live next to them and are committed
+.playwright-cli/
