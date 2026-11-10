@@ -154,6 +154,29 @@ describe('PayslipPage', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
+  it("names whose payslip it is from the payload, else from the list link's state, else not at all", async () => {
+    signInAs('HR');
+    const { unmount } = renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip' });
+    expect(await screen.findByRole('heading', { level: 1, name: 'Payslip: Ada Lovelace' })).toBeInTheDocument();
+    unmount();
+
+    vi.mocked(api.getPayslip).mockRejectedValue(
+      new ApiError({ status: 422, title: 'Business rule violated', detail: 'Employee was not yet hired in 2019-01.' }),
+    );
+    const { unmount: unmountLinked } = renderRoute(<PayslipPage />, {
+      path: '/employees/:id/payslip',
+      url: { pathname: '/employees/emp-1/payslip', search: '?month=2019-01', state: { from: '?page=2', name: 'Grace Hopper' } },
+    });
+    await screen.findByText('Employee was not yet hired in 2019-01.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Payslip: Grace Hopper');
+    expect(screen.getByRole('link', { name: '← Back to employees' })).toHaveAttribute('href', '/employees?page=2');
+    unmountLinked();
+
+    renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=2019-01' });
+    await screen.findByText('Employee was not yet hired in 2019-01.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/^Payslip$/);
+  });
+
   it('tells an employee without an employee record that there is nothing to show', () => {
     signInAs('Employee', { employeeId: null });
     renderRoute(<PayslipPage />, { path: '/me/payslip', url: '/me/payslip' });

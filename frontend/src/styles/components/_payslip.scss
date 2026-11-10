@@ -5,10 +5,14 @@
   display: flex;
   align-items: center;
   gap: $space-2 + $space-1;
-  padding: $space-2 + $space-1 $space-3;
+  padding: $space-2 + $space-1 $space-4;
 
   &__month {
     width: auto;
+  }
+
+  @include below($breakpoint-sm) {
+    padding-inline: $space-3;
   }
 }
 
@@ -43,7 +47,6 @@
   }
 
   &__subtitle {
-    font-size: $font-size;
     margin-bottom: $space-2;
   }
 
@@ -69,15 +72,25 @@
       padding-left: $space-3;
       font-variant-numeric: tabular-nums;
     }
+
+    // The card's own gap already sits above the first section (the caption is the table's first child).
+    tbody:first-of-type .payslip__section th {
+      padding-top: 0;
+    }
   }
 
+  // After &__table so the bold beats its `th { font-weight: 400 }` (same specificity).
+  &__subtitle,
   &__section th {
-    padding-top: $space-4;
     font-size: $font-size-sm;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: $color-text-muted;
+  }
+
+  &__section th {
+    padding-top: $space-4;
   }
 
   &__note {

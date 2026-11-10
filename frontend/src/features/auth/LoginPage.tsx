@@ -1,9 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { errorMessage } from '../../api/problem';
+import { errorMessage, isStatus } from '../../api/problem';
 import { Alert } from '../../shared/components/Alert';
 import { Button } from '../../shared/components/Button';
 import { TextField } from '../../shared/components/TextField';
+import { validateEmail } from '../employees/validation';
 import { homePathFor, useAuth } from './AuthContext';
 
 export function LoginPage() {
@@ -15,6 +16,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -25,17 +27,20 @@ export function LoginPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!email.trim() || !password) {
-      setError('Enter your email and password.');
-      return;
-    }
-    setSubmitting(true);
+    const invalid = { email: validateEmail(email), password: password ? undefined : 'Password is required.' };
+    setFieldErrors(invalid);
     setError(null);
+    if (invalid.email || invalid.password) return;
+    setSubmitting(true);
     try {
       const signedIn = await login(email.trim(), password);
       navigate(from ?? homePathFor(signedIn.role), { replace: true });
     } catch (caught) {
-      setError(errorMessage(caught));
+      const server = isStatus(caught, 400)
+        ? { email: caught.fieldErrors.email?.[0], password: caught.fieldErrors.password?.[0] }
+        : {};
+      setFieldErrors(server);
+      if (!server.email && !server.password) setError(errorMessage(caught));
       setSubmitting(false);
     }
   }
@@ -55,6 +60,7 @@ export function LoginPage() {
             maxLength={254}
             value={email}
             onChange={setEmail}
+            error={fieldErrors.email}
             required
           />
           <TextField
@@ -64,6 +70,7 @@ export function LoginPage() {
             maxLength={128}
             value={password}
             onChange={setPassword}
+            error={fieldErrors.password}
             required
           />
           <Button type="submit" disabled={submitting} className="button--block">
