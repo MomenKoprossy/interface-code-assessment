@@ -1,13 +1,17 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as api from '../../api/employees';
+import * as payrollApi from '../../api/payroll';
 import { ApiError } from '../../api/problem';
 import type { EmployeeListItem, PagedResult } from '../../api/types';
+import { AuthProvider } from '../auth/AuthContext';
 import { currentLocation, renderRoute, signInAs, type RouteEntry } from '../../test/render';
 import { EmployeesListPage } from './EmployeesListPage';
 
 vi.mock('../../api/employees');
+vi.mock('../../api/payroll');
 
 function employee(n: number): EmployeeListItem {
   return {
@@ -43,6 +47,7 @@ beforeEach(() => {
   signInAs('HR');
   vi.mocked(api.listDepartments).mockResolvedValue(['Finance', 'R&D']);
   vi.mocked(api.listEmployees).mockImplementation(async (query) => page(query.page, 25));
+  vi.mocked(payrollApi.getPayrollPolicy).mockResolvedValue({ currency: 'USD' });
 });
 
 const renderList = (url: RouteEntry = '/employees') =>
@@ -56,8 +61,8 @@ describe('EmployeesListPage', () => {
     await waitFor(() => expect(document.title).toBe('Employees · Employee Payroll'));
     expect(screen.getByText('25 employees')).toBeInTheDocument();
     expect(screen.getByText('Page 1 of 3')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '← Previous' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Next →' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: '← Previous' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Next →' })).toHaveAttribute('aria-disabled', 'false');
     expect(lastQuery()).toEqual({ page: 1, pageSize: 10, search: undefined, department: undefined, status: undefined });
   });
 
@@ -106,7 +111,7 @@ describe('EmployeesListPage', () => {
     renderList('/employees?page=3&status=Active&department=R%26D');
 
     expect(await screen.findByText('Page 3 of 3')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Next →' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Next →' })).toHaveAttribute('aria-disabled', 'true');
     expect(lastQuery()).toMatchObject({ page: 3, status: 'Active', department: 'R&D' });
     expect(screen.getByLabelText('Status')).toHaveValue('Active');
   });
@@ -134,6 +139,51 @@ describe('EmployeesListPage', () => {
     await waitFor(() => expect(currentLocation()).toBe('/employees?search=ada'));
     await waitFor(() => expect(lastQuery()).toMatchObject({ search: 'ada', page: 1 }));
     expect(vi.mocked(api.listEmployees).mock.calls.filter(([q]) => q.search !== undefined)).toHaveLength(1);
+  });
+
+  it('keeps a filter changed while the search debounce is pending', async () => {
+    const user = userEvent.setup();
+    renderList();
+    await screen.findByRole('option', { name: 'Finance' });
+
+    await user.type(screen.getByLabelText('Search'), 'ada');
+    await user.selectOptions(screen.getByLabelText('Department'), 'Finance');
+
+    await waitFor(() => expect(currentLocation()).toBe('/employees?department=Finance&search=ada'));
+  });
+
+  it('shows salaries in the payroll policy currency', async () => {
+    renderList();
+    const row = (await screen.findByText('Employee 1')).closest('tr') as HTMLElement;
+    await waitFor(() => expect(within(row).getByText('$4,001.00')).toBeInTheDocument());
+  });
+
+  it('shows plain salaries when the payroll policy fails to load', async () => {
+    vi.mocked(payrollApi.getPayrollPolicy).mockRejectedValue(new ApiError({ status: 500, title: 'Server error' }));
+    renderList();
+    const row = (await screen.findByText('Employee 1')).closest('tr') as HTMLElement;
+    expect(within(row).getByText('4,001.00')).toBeInTheDocument();
+  });
+
+  it('passes the employee name to the payslip page', async () => {
+    function StateProbe() {
+      return <output>{JSON.stringify(useLocation().state)}</output>;
+    }
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/employees?page=2']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/employees" element={<EmployeesListPage />} />
+            <Route path="/employees/:id/payslip" element={<StateProbe />} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole('link', { name: 'Payslip for Employee 11' }));
+
+    expect(screen.getByRole('status')).toHaveTextContent('{"from":"?page=2","name":"Employee 11"}');
   });
 
   it('shows an empty state for filters with no match', async () => {
@@ -170,6 +220,8 @@ describe('EmployeesListPage', () => {
     expect(await screen.findByText('Employee 1 was deleted.')).toBeInTheDocument();
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     await waitFor(() => expect(vi.mocked(api.listEmployees).mock.calls.length).toBeGreaterThan(callsBefore));
+    // The deleted employee may have been the last one in their department.
+    await waitFor(() => expect(api.listDepartments).toHaveBeenCalledTimes(2));
   });
 
   it('reports "already deleted" on a 404', async () => {

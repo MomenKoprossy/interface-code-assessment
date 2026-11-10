@@ -51,3 +51,8 @@ $alert-tones: (
     }
   }
 }
+
+// Focusable wrapper around a post-action alert: the focus ring follows the card's corners.
+.notice {
+  border-radius: $radius;
+}

@@ -3,6 +3,8 @@
 .dialog-backdrop {
   position: fixed;
   inset: 0;
+  // Rendered inside <main>, whose `> * + *` spacing would otherwise push it down.
+  margin: 0;
   display: grid;
   place-items: center;
   padding: $space-3;

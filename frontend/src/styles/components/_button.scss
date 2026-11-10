@@ -17,7 +17,8 @@
   cursor: pointer;
   transition: background-color 120ms ease, border-color 120ms ease;
 
-  &:disabled {
+  &:disabled,
+  &[aria-disabled='true'] {
     opacity: 0.55;
     cursor: not-allowed;
   }
@@ -26,7 +27,7 @@
     background: $color-accent;
     color: $color-on-accent;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
       background: $color-accent-hover;
       color: $color-on-accent;
     }
@@ -37,7 +38,7 @@
     border-color: $color-border-strong;
     color: $color-text;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
       background: $color-surface-alt;
       color: $color-text;
     }
@@ -47,7 +48,7 @@
     background: $color-danger;
     color: $color-on-accent;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
       background: $color-danger-hover;
     }
   }
@@ -56,7 +57,7 @@
     background: transparent;
     color: $color-text-muted;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled='true']) {
       background: $color-surface-alt;
       color: $color-text;
     }
