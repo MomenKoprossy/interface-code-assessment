@@ -5,9 +5,9 @@ using OpenTelemetry.Trace;
 namespace Microsoft.Extensions.Hosting;
 
 /// <summary>
-/// Platform observability add-ons. Call <em>after</em> <see cref="Extensions.AddServiceDefaults{TBuilder}"/>.
-/// Adds EF Core tracing (SQL on <c>db.query.text</c>) + EF metrics. The template's gRPC/Redis/Rebus/YARP
-/// instrumentation is intentionally not wired: this app doesn't use those (see .claude/docs/scalability.md).
+/// Call <em>after</em> <see cref="Extensions.AddServiceDefaults{TBuilder}"/>. Adds EF Core tracing (SQL on
+/// <c>db.query.text</c>) + EF metrics. The template's gRPC/Redis/Rebus/YARP instrumentation is intentionally
+/// not wired: this app doesn't use those (see .claude/docs/scalability.md).
 /// </summary>
 public static class PlatformObservability
 {

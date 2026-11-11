@@ -13,11 +13,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BuildingBlocks.Web;
 
-/// <summary>
-/// Security baseline: JWT bearer (symmetric key from config section <c>Jwt</c>), the permission
-/// policy provider + handler (exact permission claim), a global fixed-window rate limiter plus the named
-/// <see cref="LoginRateLimitPolicy"/>, and sensible security headers. Wired by <c>AddPlatform()</c>.
-/// </summary>
 public static class SecurityRegistration
 {
     /// <summary>
@@ -26,7 +21,6 @@ public static class SecurityRegistration
     /// </summary>
     public const string LoginRateLimitPolicy = "login";
 
-    /// <summary>Default global rate-limit window: 100 requests / 10s per client IP (overridable via the <c>RateLimiting</c> section).</summary>
     private const int DefaultPermitLimit = 100;
     private const int DefaultWindowSeconds = 10;
     private const int DefaultLoginPermitLimit = 10;

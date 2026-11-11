@@ -4,11 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BuildingBlocks.Data;
 
-/// <summary>
-/// Generic EF Core implementation of <see cref="IRepository{TEntity, TId}"/> over the resolved
-/// <see cref="DbContext"/>. Registered open-generic by <c>AddPlatformRepositories</c> so any
-/// aggregate gets a repository for free. Keys off <c>DbContext.Set&lt;TEntity&gt;()</c>.
-/// </summary>
 public sealed class EfRepository<TEntity, TId>(DbContext db) : IRepository<TEntity, TId>
     where TEntity : class
 {

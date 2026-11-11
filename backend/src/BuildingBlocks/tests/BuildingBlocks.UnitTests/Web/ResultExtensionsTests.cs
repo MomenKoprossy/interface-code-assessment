@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace BuildingBlocks.UnitTests.Web;
 
-/// <summary><see cref="ResultExtensions"/> maps each <see cref="ErrorType"/> to its precise HTTP status.</summary>
 public class ResultExtensionsTests
 {
     [Theory]

@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.UnitTests.Web;
 
-/// <summary>A <c>perm:</c> policy succeeds only for the exact permission claim: no super-admin role, no wildcard.</summary>
 public class PermissionAuthorizationTests
 {
     private const string Policy = HasPermissionAttribute.PolicyPrefix + "employees.read";

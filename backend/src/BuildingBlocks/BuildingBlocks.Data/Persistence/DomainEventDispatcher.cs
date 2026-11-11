@@ -5,12 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.Data;
 
-/// <summary>
-/// Resolves and invokes the registered <see cref="IDomainEventHandler{TEvent}"/>(s) for each domain
-/// event collected during SaveChanges. For every event its concrete runtime type closes the open
-/// handler interface, all matching handlers are resolved from DI, and <c>Handle</c> is invoked.
-/// No-op when no handlers are registered for an event.
-/// </summary>
 public sealed class DomainEventDispatcher(IServiceProvider serviceProvider) : IDomainEventDispatcher
 {
     private static readonly ConcurrentDictionary<Type, HandlerInvoker> Invokers = new();

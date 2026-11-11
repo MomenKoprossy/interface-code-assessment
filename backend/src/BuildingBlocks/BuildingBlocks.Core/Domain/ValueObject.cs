@@ -1,6 +1,5 @@
 namespace BuildingBlocks.Domain;
 
-/// <summary>Classic value object: equality by structural components.</summary>
 public abstract class ValueObject : IEquatable<ValueObject>
 {
     protected abstract IEnumerable<object?> GetEqualityComponents();

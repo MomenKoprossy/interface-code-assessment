@@ -6,18 +6,15 @@ using StackExchange.Redis;
 
 namespace BuildingBlocks.Caching;
 
-/// <summary>Registers HybridCache (L1 in-memory by default, Redis L2 only when configured).</summary>
 public static class CachingRegistration
 {
     private static readonly TimeSpan DefaultExpiration = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan DefaultLocalCacheExpiration = TimeSpan.FromMinutes(1);
 
     /// <summary>
-    /// Adds <c>HybridCache</c> with platform default entry options (overall expiration 5 min, local
-    /// L1 expiration 1 min). If a connection string named <c>cache</c> exists (Aspire provides it when
-    /// a Redis resource is referenced) it also registers the Redis <c>IDistributedCache</c> — which
-    /// HybridCache automatically promotes to its L2 backplane — and an <see cref="IConnectionMultiplexer"/>
-    /// so Redis tracing can hook the connection.
+    /// When a <c>cache</c> connection string exists (Aspire provides it for a referenced Redis resource), also
+    /// registers the Redis <c>IDistributedCache</c>, which HybridCache picks up as its L2, and an
+    /// <see cref="IConnectionMultiplexer"/> so Redis tracing can hook the connection.
     /// </summary>
     public static TBuilder AddPlatformCaching<TBuilder>(this TBuilder builder)
         where TBuilder : IHostApplicationBuilder

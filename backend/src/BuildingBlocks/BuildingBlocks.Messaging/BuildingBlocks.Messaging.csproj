@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    BuildingBlocks.Messaging = IEventBus (publish/subscribe integration events) over RabbitMQ
-    via Rebus. Opt-in: only for asynchronous cross-service events. Rebus.OpenTelemetry enables producer/consumer trace spans.
-  -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Messaging</RootNamespace>
     <Description>Messaging building block: IEventBus over RabbitMQ via Rebus for publishing/subscribing integration events, with OpenTelemetry producer/consumer spans. Registers a no-op bus when RabbitMQ is absent.</Description>
