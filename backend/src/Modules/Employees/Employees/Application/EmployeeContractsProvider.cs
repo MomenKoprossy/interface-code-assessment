@@ -3,7 +3,6 @@ using Employees.Domain;
 
 namespace Employees.Application;
 
-/// <summary>Implements the Employees module's public contracts on top of its own port.</summary>
 public sealed class EmployeeContractsProvider(IEmployeeRepository employees)
     : IEmployeePayrollProfileProvider, IEmployeeDirectory
 {

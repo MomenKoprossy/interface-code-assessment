@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Employees.Infrastructure.Persistence;
 
-/// <summary>EF Core (PostgreSQL) adapter for <see cref="IEmployeeRepository"/>. The soft-delete query filter hides deleted rows.</summary>
+/// <summary>The soft-delete query filter hides deleted rows.</summary>
 internal sealed class EmployeeRepository(DbContext db) : IEmployeeRepository
 {
     private DbSet<Employee> Employees => db.Set<Employee>();

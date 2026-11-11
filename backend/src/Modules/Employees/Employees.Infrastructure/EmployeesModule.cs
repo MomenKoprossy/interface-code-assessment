@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 
 namespace Employees.Infrastructure;
 
-/// <summary>Composition of the Employees module: called once by the host.</summary>
 public static class EmployeesModule
 {
     public static IHostApplicationBuilder AddEmployeesModule(this IHostApplicationBuilder builder)

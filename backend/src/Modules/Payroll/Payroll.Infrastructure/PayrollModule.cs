@@ -8,7 +8,7 @@ using Payroll.Domain.Rules;
 
 namespace Payroll.Infrastructure;
 
-/// <summary>Composition of the Payroll module: called once by the host. Payroll has no tables.</summary>
+/// <summary>Payroll has no tables.</summary>
 public static class PayrollModule
 {
     public static IHostApplicationBuilder AddPayrollModule(this IHostApplicationBuilder builder)
