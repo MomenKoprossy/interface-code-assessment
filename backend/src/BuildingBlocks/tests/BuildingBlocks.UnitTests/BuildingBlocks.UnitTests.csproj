@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Tests the building blocks from SOURCE (project references), before they are packed to the local feed.
-       Lives in the producer solution (BuildingBlocks.slnx); never packed. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>BuildingBlocks.UnitTests</RootNamespace>

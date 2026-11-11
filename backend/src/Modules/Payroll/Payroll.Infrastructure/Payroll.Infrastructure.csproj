@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Payroll module ADAPTERS: minimal-API endpoints, options binding/validation, and the module's composition
-       (AddPayrollModule / MapPayrollEndpoints). No persistence: payslips are computed on request. -->
+  <!-- No persistence: payslips are computed on request. -->
   <PropertyGroup>
     <RootNamespace>Payroll.Infrastructure</RootNamespace>
   </PropertyGroup>

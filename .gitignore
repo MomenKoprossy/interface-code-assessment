@@ -25,7 +25,7 @@ coverage/
 Thumbs.db
 .DS_Store
 
-# Claude Code: local-only state (worktrees of parallel agents, session watchdog, local settings)
+# Local-only tool state
 .claude/worktrees/
 .claude/settings.local.json
 .claude/watchdog-continue.ps1
@@ -35,7 +35,7 @@ Thumbs.db
 # The assessment brief is the company's document; it stays out of the repository
 Interface_Code_Assessment_2026.pdf
 
-# Claude Code scheduler lock (session-local)
+# Local-only scheduler lock
 .claude/scheduled_tasks.lock
 
 # playwright-cli session artifacts (snapshots/logs); curated screenshots live next to them and are committed

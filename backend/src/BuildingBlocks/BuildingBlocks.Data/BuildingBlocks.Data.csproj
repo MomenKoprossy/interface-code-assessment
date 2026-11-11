@@ -1,10 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    BuildingBlocks.Data = provider-agnostic EF Core persistence (DbContext base with audit/soft-delete/domain-event
-    handling, EfRepository, EfUnitOfWork, module model contributions). The concrete DB provider (Npgsql) is chosen by
-    the host, not here.
-  -->
+  <!-- The concrete DB provider (Npgsql) is chosen by the host, not here. -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Data</RootNamespace>
     <Description>EF Core persistence building block: AppDbContextBase with audit/soft-delete/domain-event interception, EfRepository, EfUnitOfWork, and module model contributions. DB-provider-agnostic.</Description>

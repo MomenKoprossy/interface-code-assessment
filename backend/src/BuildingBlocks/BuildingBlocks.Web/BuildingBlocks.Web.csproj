@@ -1,12 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    BuildingBlocks.Web = AspNetCore + Security.
-    Web edge: ProblemDetails + global exception handler, Result->IResult mapping,
-    request/response logging, AddPlatform()/UsePlatform() aggregation, JWT bearer,
-    permission policy provider + [HasPermission], rate limiting, security headers, HttpCurrentUser.
     References Core only; opt-in capabilities (caching/messaging/grpc) are wired by the
-    SERVICE via those packages' own extension methods, so Web stays dependency-lean.
+    service via those packages' own extension methods, so Web stays dependency-lean.
   -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Web</RootNamespace>

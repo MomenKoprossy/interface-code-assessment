@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Employees module ADAPTERS: EF Core mappings + repositories, minimal-API endpoints, options binding, seeding,
-       and the module's composition (AddEmployeesModule / MapEmployeesEndpoints). -->
   <PropertyGroup>
     <RootNamespace>Employees.Infrastructure</RootNamespace>
   </PropertyGroup>
