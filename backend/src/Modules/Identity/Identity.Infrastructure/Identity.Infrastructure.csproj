@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Identity module ADAPTERS: EF Core mappings + repositories, minimal-API endpoints, options binding, seeding,
-       and the module's composition (AddIdentityModule / MapIdentityEndpoints). -->
   <PropertyGroup>
     <RootNamespace>Identity.Infrastructure</RootNamespace>
   </PropertyGroup>
