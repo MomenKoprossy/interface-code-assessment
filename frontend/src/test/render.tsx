@@ -43,7 +43,6 @@ export function renderRoute(element: ReactElement, { path = '/', url = '/' }: { 
   );
 }
 
-/** Renders the whole route table (App) at `url`. */
 export function renderApp(app: ReactElement, url: string) {
   return render(
     <MemoryRouter initialEntries={[url]}>
