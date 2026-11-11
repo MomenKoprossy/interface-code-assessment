@@ -40,3 +40,6 @@ Interface_Code_Assessment_2026.pdf
 
 # playwright-cli session artifacts (snapshots, logs)
 .playwright-cli/
+
+# Claude Code workspace (local instructions and settings)
+.claude/

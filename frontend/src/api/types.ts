@@ -1,4 +1,4 @@
-// DTOs copied from .claude/docs/api-contract.md (v1). Keep in sync with the contract, not with server internals.
+// DTOs copied from docs/api-contract.md (v1). Keep in sync with the contract, not with server internals.
 
 export type Role = 'HR' | 'Employee';
 

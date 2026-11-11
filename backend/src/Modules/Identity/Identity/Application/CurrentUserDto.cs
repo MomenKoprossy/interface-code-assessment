@@ -2,7 +2,6 @@ using Identity.Domain;
 
 namespace Identity.Application;
 
-/// <summary>The contract's <c>CurrentUser</c>.</summary>
 public sealed record CurrentUserDto(
     Guid Id,
     string Email,

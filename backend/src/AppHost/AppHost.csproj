@@ -1,8 +1,10 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.4.2">
+<Project Sdk="Aspire.AppHost.Sdk/13.6.5">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <UserSecretsId>9b0c2f4e-1d7a-4c55-8f1e-6a2d3b4c5e60</UserSecretsId>
+    <!-- Started with `dotnet run`, not the Aspire CLI, so the CLI bundle isn't needed. -->
+    <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

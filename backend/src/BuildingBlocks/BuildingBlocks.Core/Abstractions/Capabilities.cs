@@ -1,6 +1,6 @@
 namespace BuildingBlocks.Abstractions;
 
-/// <summary>Entities opt INTO auditing; the EF interceptor stamps these (keys off the interface, not a base type).</summary>
+/// <summary>Entities opt into auditing; SaveChanges stamps these (keyed off the interface, not a base type).</summary>
 public interface IAuditable
 {
     DateTime? CreatedAtUtc { get; set; }
@@ -9,7 +9,7 @@ public interface IAuditable
     Guid? ModifiedBy { get; set; }
 }
 
-/// <summary>Entities opt INTO soft-delete; the EF interceptor converts deletes to flag updates + applies a global filter.</summary>
+/// <summary>Entities opt into soft delete; SaveChanges turns deletes into flag updates and a global query filter hides them.</summary>
 public interface ISoftDeletable
 {
     bool IsDeleted { get; set; }

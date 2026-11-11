@@ -7,7 +7,6 @@ namespace Identity.Application;
 
 public sealed record LoginCommand(string Email, string Password) : ICommand<Result<LoginResponse>>;
 
-/// <summary>The contract's <c>LoginResponse</c>.</summary>
 public sealed record LoginResponse(string AccessToken, DateTime ExpiresAtUtc, CurrentUserDto User);
 
 internal sealed class LoginValidator : AbstractValidator<LoginCommand>

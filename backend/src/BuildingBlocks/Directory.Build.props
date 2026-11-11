@@ -3,7 +3,7 @@
   <!--
     Build settings for the vendored BuildingBlocks.* libraries (from the DotnetPlayGround template).
     In the template these are packed to a local NuGet feed; here they are consumed as SOURCE via
-    ProjectReference so every line that runs is readable in the repo (see .claude/docs/adr ADR-002).
+    ProjectReference so every line that runs is readable in the repo (see docs/adr ADR-002).
   -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 

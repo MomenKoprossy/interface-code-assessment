@@ -4,10 +4,8 @@ namespace BuildingBlocks.Application;
 
 public interface IRequest<out TResponse>;
 
-/// <summary>A state-changing request.</summary>
 public interface ICommand<out TResponse> : IRequest<TResponse>;
 
-/// <summary>A read-only request.</summary>
 public interface IQuery<out TResponse> : IRequest<TResponse>;
 
 /// <summary>The next step in the pipeline (the wrapped handler or the next behavior).</summary>

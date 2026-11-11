@@ -9,7 +9,7 @@
 
   <ItemGroup Label="Caching (HybridCache, Redis L2 when configured)">
     <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.6.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.15" />
     <PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
   </ItemGroup>
 
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup Label="BuildingBlocks.UnitTests (outbox tests use an in-memory relational provider)">
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.15" />
     <!-- EF Sqlite 10.0.8 pulls SQLitePCLRaw.lib.e_sqlite3 2.1.11 (NU1903, GHSA-2m69-gcr7-jv3q); pin the patched 2.1.x. -->
     <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.14" />
   </ItemGroup>

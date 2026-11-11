@@ -34,7 +34,7 @@ frontend/src/
   api/
     http.ts                    fetch wrapper: base URL, Bearer token, JSON, ProblemDetails → ApiError
     problem.ts                 ApiError type (status, title, detail, fieldErrors, traceId) + helpers
-    types.ts                   DTO types copied from .claude/docs/api-contract.md
+    types.ts                   DTO types copied from docs/api-contract.md
     employees.ts, payroll.ts, auth.ts   typed endpoint functions
   features/
     auth/      AuthContext (token in sessionStorage), LoginPage, RequireAuth / RequireRole

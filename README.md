@@ -90,10 +90,10 @@ frontend (React/TS/SCSS) ──/api──▶ Api host (composition root only)
   rounded lines, so a payslip always adds up to the cent (ADR-007).
 - **Auth**: JWT with roles and permission claims, enforced server-side. An Employee can read only their own payslip (ADR-008).
 
-Full design: [`.claude/docs/architecture.md`](.claude/docs/architecture.md) · decisions:
-[`.claude/docs/adr/`](.claude/docs/adr/README.md) · API: [`.claude/docs/api-contract.md`](.claude/docs/api-contract.md) ·
-payroll spec: [`.claude/docs/payroll-rules.md`](.claude/docs/payroll-rules.md) · growth path:
-[`.claude/docs/scalability.md`](.claude/docs/scalability.md)
+Full design: [`docs/architecture.md`](docs/architecture.md) · decisions:
+[`docs/adr/`](docs/adr/README.md) · API: [`docs/api-contract.md`](docs/api-contract.md) ·
+payroll spec: [`docs/payroll-rules.md`](docs/payroll-rules.md) · growth path:
+[`docs/scalability.md`](docs/scalability.md)
 
 ## Assumptions
 
@@ -119,7 +119,7 @@ payroll spec: [`.claude/docs/payroll-rules.md`](.claude/docs/payroll-rules.md) �
   concurrency token, a version on `EmployeeDetails`/`PUT`, and 409 on conflict.
 - Deleting an employee is not announced to other modules (only Active → Inactive raises `EmployeeDeactivated`). Next:
   an `EmployeeRemoved` event in `Employees.Contracts` when a module needs it.
-- See [`.claude/docs/scalability.md`](.claude/docs/scalability.md) for how messaging/outbox, gRPC and service
+- See [`docs/scalability.md`](docs/scalability.md) for how messaging/outbox, gRPC and service
   extraction plug in.
 
 ## AI usage

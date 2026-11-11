@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Growth path: built and tested in BuildingBlocks.slnx, not referenced by the app (see .claude/docs/scalability.md). -->
+  <!-- Growth path: built and tested in BuildingBlocks.slnx, not referenced by the app (see docs/scalability.md). -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Caching</RootNamespace>
     <Description>Caching building block: AddPlatformCaching registers HybridCache with platform defaults and a Redis L2 when configured.</Description>
