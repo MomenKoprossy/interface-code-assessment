@@ -37,7 +37,6 @@ public sealed class Employee : AggregateRoot<Guid>, IAuditable, ISoftDeletable
 
     private Employee() { }
 
-    /// <param name="data">The employee's fields.</param>
     /// <param name="today">Today's date in UTC, for the "hire date not in the future" invariant.</param>
     public static Employee Create(EmployeeData data, DateOnly today)
     {

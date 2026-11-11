@@ -14,7 +14,6 @@ using Microsoft.Extensions.Options;
 
 namespace Identity.Infrastructure;
 
-/// <summary>Composition of the Identity module: called once by the host.</summary>
 public static class IdentityModule
 {
     public static IHostApplicationBuilder AddIdentityModule(this IHostApplicationBuilder builder)

@@ -42,7 +42,7 @@ var app = builder.Build();
 
 app.UsePlatform();
 app.MapDefaultEndpoints();
-// API docs: always in Development; elsewhere only when OpenApi:Enabled=true (docker compose sets it for reviewers).
+// docker compose sets OpenApi:Enabled so the docs are reachable outside Development.
 if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("OpenApi:Enabled"))
 {
     app.MapOpenApi();
