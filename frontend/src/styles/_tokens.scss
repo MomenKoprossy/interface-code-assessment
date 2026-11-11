@@ -1,6 +1,5 @@
 // Design tokens. Neutral light theme, one accent (indigo). Text colors meet WCAG AA (>= 4.5:1) on their backgrounds.
 
-// Colors
 $color-bg: #f6f7f9;
 $color-surface: #ffffff;
 $color-surface-alt: #f9fafb;
@@ -24,7 +23,7 @@ $color-info: #1d4ed8;
 $color-info-soft: #eff6ff;
 $color-focus: #4f46e5;
 
-// Spacing: 8 px scale (with a 4 px half step)
+// 8 px scale with a 4 px half step
 $space-1: 4px;
 $space-2: 8px;
 $space-3: 16px;
@@ -32,13 +31,11 @@ $space-4: 24px;
 $space-5: 32px;
 $space-6: 48px;
 
-// Shape
 $radius-sm: 4px;
 $radius: 8px;
 $radius-lg: 12px;
 $shadow-dialog: 0 12px 32px rgba(16, 24, 40, 0.18);
 
-// Type
 $font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 $font-size-sm: 0.875rem;
 $font-size: 1rem;
@@ -46,7 +43,6 @@ $font-size-lg: 1.125rem;
 $font-size-xl: 1.5rem;
 $line-height: 1.5;
 
-// Layout
 $content-max-width: 1120px;
 $breakpoint-sm: 640px;
 $breakpoint-md: 900px;
