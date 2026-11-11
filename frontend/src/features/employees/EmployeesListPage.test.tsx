@@ -61,8 +61,8 @@ describe('EmployeesListPage', () => {
     await waitFor(() => expect(document.title).toBe('Employees · Employee Payroll'));
     expect(screen.getByText('25 employees')).toBeInTheDocument();
     expect(screen.getByText('Page 1 of 3')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '← Previous' })).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByRole('button', { name: 'Next →' })).toHaveAttribute('aria-disabled', 'false');
+    expect(screen.getByRole('button', { name: 'Previous' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Next' })).toHaveAttribute('aria-disabled', 'false');
     expect(lastQuery()).toEqual({ page: 1, pageSize: 10, search: undefined, department: undefined, status: undefined });
   });
 
@@ -77,7 +77,7 @@ describe('EmployeesListPage', () => {
     renderList();
     await screen.findByText('Employee 1');
 
-    await user.click(screen.getByRole('button', { name: 'Next →' }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
 
     expect(currentLocation()).toBe('/employees?page=2');
     expect(await screen.findByText('Employee 11')).toBeInTheDocument();
@@ -89,11 +89,11 @@ describe('EmployeesListPage', () => {
     renderList();
     await screen.findByText('Employee 1');
 
-    await user.click(screen.getByRole('button', { name: 'Next →' }));
+    await user.click(screen.getByRole('button', { name: 'Next' }));
 
-    expect(screen.getByRole('button', { name: 'Next →' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Next' })).toHaveFocus();
     expect(await screen.findByText('Employee 11')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Next →' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Next' })).toHaveFocus();
   });
 
   it('shows the notice passed by the form page until the filters change', async () => {
@@ -111,7 +111,7 @@ describe('EmployeesListPage', () => {
     renderList('/employees?page=3&status=Active&department=R%26D');
 
     expect(await screen.findByText('Page 3 of 3')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Next →' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Next' })).toHaveAttribute('aria-disabled', 'true');
     expect(lastQuery()).toMatchObject({ page: 3, status: 'Active', department: 'R&D' });
     expect(screen.getByLabelText('Status')).toHaveValue('Active');
   });

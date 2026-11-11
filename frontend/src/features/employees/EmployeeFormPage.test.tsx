@@ -67,7 +67,7 @@ describe('EmployeeFormPage', () => {
     await user.click(await screen.findByRole('link', { name: 'Edit Ada Lovelace' }));
     const jobTitle = await screen.findByLabelText(/job title/i);
     expect(screen.getByRole('link', { name: 'Cancel' })).toHaveAttribute('href', '/employees?page=2&status=Active');
-    expect(screen.getByRole('link', { name: '← Back to employees' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Back to employees' })).toHaveAttribute(
       'href',
       '/employees?page=2&status=Active',
     );

@@ -14,13 +14,13 @@ export function Pagination({ page, totalPages, onPageChange }: PaginationProps) 
   return (
     <nav className="pagination" aria-label="Pagination">
       <Button variant="secondary" small aria-disabled={isFirst} onClick={() => !isFirst && onPageChange(page - 1)}>
-        ← Previous
+        <span aria-hidden="true">←</span> Previous
       </Button>
       <span className="pagination__status" aria-live="polite">
         Page {page} of {totalPages}
       </span>
       <Button variant="secondary" small aria-disabled={isLast} onClick={() => !isLast && onPageChange(page + 1)}>
-        Next →
+        Next <span aria-hidden="true">→</span>
       </Button>
     </nav>
   );

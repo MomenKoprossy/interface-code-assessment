@@ -1,15 +1,17 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as employeesApi from '../../api/employees';
 import * as api from '../../api/payroll';
 import { ApiError } from '../../api/problem';
-import type { Payslip } from '../../api/types';
+import type { EmployeeDetails, Payslip } from '../../api/types';
 import { currentMonth } from '../../shared/format';
 import { currentLocation, renderRoute, signInAs } from '../../test/render';
 import { PayslipPage } from './PayslipPage';
 import { PayslipView } from './PayslipView';
 
 vi.mock('../../api/payroll');
+vi.mock('../../api/employees');
 
 /** As the server would return it for the default policy (USD, SI 11 % capped at 1,100). */
 const payslip: Payslip = {
@@ -156,7 +158,8 @@ describe('PayslipPage', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it("names whose payslip it is from the payload, else from the list link's state, else not at all", async () => {
+  it("names whose payslip it is from the payload, else the list link's state, else a lookup, else not at all", async () => {
+    vi.mocked(employeesApi.getEmployee).mockRejectedValue(new ApiError({ status: 404, title: 'Not found' }));
     signInAs('HR');
     const { unmount } = renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip' });
     expect(await screen.findByRole('heading', { level: 1, name: 'Payslip: Ada Lovelace' })).toBeInTheDocument();
@@ -171,12 +174,22 @@ describe('PayslipPage', () => {
     });
     await screen.findByText('Employee was not yet hired in January 2019.');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Payslip: Grace Hopper');
-    expect(screen.getByRole('link', { name: '← Back to employees' })).toHaveAttribute('href', '/employees?page=2');
+    expect(screen.getByRole('link', { name: 'Back to employees' })).toHaveAttribute('href', '/employees?page=2');
     unmountLinked();
 
-    renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=2019-01' });
+    const { unmount: unmountUnknown } = renderRoute(<PayslipPage />, {
+      path: '/employees/:id/payslip',
+      url: '/employees/emp-1/payslip?month=2019-01',
+    });
     await screen.findByText('Employee was not yet hired in January 2019.');
+    await waitFor(() => expect(employeesApi.getEmployee).toHaveBeenCalledWith('emp-1', expect.any(AbortSignal)));
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/^Payslip$/);
+    unmountUnknown();
+
+    // A direct link with no state: the name is looked up.
+    vi.mocked(employeesApi.getEmployee).mockResolvedValue({ fullName: 'Grace Hopper' } as EmployeeDetails);
+    renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=2019-01' });
+    expect(await screen.findByRole('heading', { level: 1, name: 'Payslip: Grace Hopper' })).toBeInTheDocument();
   });
 
   it("keeps the employee's name after switching to a month with no payslip", async () => {

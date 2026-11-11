@@ -22,7 +22,7 @@ describe('Pagination', () => {
     }
     const user = userEvent.setup();
     render(<Harness />);
-    const next = screen.getByRole('button', { name: 'Next →' });
+    const next = screen.getByRole('button', { name: 'Next' });
 
     await user.click(next);
     expect(screen.getByText('Page 3 of 3')).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe('Pagination', () => {
     const onPageChange = vi.fn();
     const user = userEvent.setup();
     render(<Pagination page={1} totalPages={3} onPageChange={onPageChange} />);
-    const previous = screen.getByRole('button', { name: '← Previous' });
+    const previous = screen.getByRole('button', { name: 'Previous' });
 
     expect(previous).toHaveAttribute('aria-disabled', 'true');
     await user.click(previous);

@@ -73,7 +73,8 @@ export function EmployeeForm({
     const fresh = validateEmployee(values, today);
     setErrors((current) => {
       const next = { ...current };
-      for (const key of new Set([path, ...Object.keys(current)])) {
+      const duplicates = Object.keys(fresh).filter((key) => fresh[key] === 'Name must be unique in this list.');
+      for (const key of new Set([path, ...Object.keys(current), ...duplicates])) {
         if (!key.startsWith(`${list}[`) || !key.endsWith('.name')) continue;
         if (fresh[key]) next[key] = fresh[key];
         else delete next[key];
@@ -295,7 +296,7 @@ function PayItemsSection({ list, items, errors, disabled, onChange, onBlur, onAd
         </div>
       ))}
       <Button ref={addRef} variant="secondary" small onClick={onAdd} disabled={full}>
-        + Add {text.singular.toLowerCase()}
+        <span aria-hidden="true">+</span> Add {text.singular.toLowerCase()}
       </Button>
       {full && <p className="form-section__hint">You can add at most {LIMITS.itemsMax}.</p>}
     </fieldset>

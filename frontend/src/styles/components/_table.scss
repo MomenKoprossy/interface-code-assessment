@@ -136,7 +136,7 @@
   &__actions {
     display: flex;
     justify-content: flex-end;
-    gap: $space-1;
+    gap: $space-2;
   }
 
   &--compact {
@@ -150,6 +150,18 @@
   @include below($breakpoint-md) {
     &:not(.data-table--compact) {
       @include table-cards;
+
+      // Tablet: a label column with each value right beside it, not at the far edge of a wide card.
+      @media (min-width: $breakpoint-sm) {
+        td[data-label] {
+          justify-content: flex-start;
+          text-align: left;
+
+          &::before {
+            flex: 0 0 9rem;
+          }
+        }
+      }
     }
   }
 

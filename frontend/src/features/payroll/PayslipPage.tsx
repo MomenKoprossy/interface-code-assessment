@@ -1,10 +1,12 @@
 import { useEffect, useId, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { getEmployee } from '../../api/employees';
 import { errorMessage, isStatus } from '../../api/problem';
 import { Alert } from '../../shared/components/Alert';
 import { PageHeader } from '../../shared/components/PageHeader';
 import { Spinner } from '../../shared/components/Spinner';
 import { currentMonth, formatMonth } from '../../shared/format';
+import { useAsync } from '../../shared/useAsync';
 import { useAuth } from '../auth/AuthContext';
 import { PayslipView } from './PayslipView';
 import { MONTH_PATTERN, usePayslip } from './usePayslip';
@@ -28,10 +30,15 @@ export function PayslipPage() {
   if (payslip.data && (known?.id !== employeeId || known.name !== payslip.data.employeeName)) {
     setKnown({ id: employeeId, name: payslip.data.employeeName });
   }
-  const name =
+  const knownName =
     payslip.data?.employeeName ??
     (known?.id === employeeId ? known.name : undefined) ??
     (typeof linkState?.name === 'string' ? linkState.name : undefined);
+  // Last resort (HR opened a link straight to a month with no payslip): ask for the employee's name.
+  const lookup = useAsync(id && !knownName && payslip.error !== undefined ? `employee-name:${id}` : null, async (signal) =>
+    getEmployee(id ?? '', signal),
+  );
+  const name = knownName ?? lookup.data?.fullName;
 
   // The input keeps its own draft so a half-typed month (text fallback where there is no native picker) isn't
   // replaced on every keystroke; only a complete month reaches the URL. Back/forward still syncs the draft.
@@ -56,7 +63,9 @@ export function PayslipPage() {
     <>
       <PageHeader
         title={id ? (name ? `Payslip: ${name}` : 'Payslip') : 'My payslip'}
-        subtitle={id ? <Link to={listUrl}>← Back to employees</Link> : undefined}
+        subtitle={id ? <Link to={listUrl}>
+              <span aria-hidden="true">←</span> Back to employees
+            </Link> : undefined}
       />
 
       <div className="card payslip-toolbar">

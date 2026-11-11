@@ -105,10 +105,16 @@ export function EmployeesListPage() {
     <>
       <PageHeader
         title="Employees"
-        subtitle={result ? `${result.totalCount} ${result.totalCount === 1 ? 'employee' : 'employees'}` : undefined}
+        subtitle={
+          result ? (
+            <span role="status">
+              {result.totalCount} {result.totalCount === 1 ? 'employee' : 'employees'}
+            </span>
+          ) : undefined
+        }
         actions={
           <Link to="/employees/new" state={{ from: location.search }} className={buttonClass('primary')}>
-            + Add employee
+            <span aria-hidden="true">+</span> Add employee
           </Link>
         }
       />

@@ -62,7 +62,7 @@ describe('EmployeeForm', () => {
   it('submits a trimmed EmployeeInput with allowance rows', async () => {
     const { user, onSubmit } = renderForm();
     await fillValidForm(user);
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
     await user.type(screen.getByRole('textbox', { name: 'Allowance 1 name' }), ' Housing ');
     await user.type(screen.getByRole('textbox', { name: 'Allowance 1 amount' }), '250.50');
 
@@ -108,7 +108,7 @@ describe('EmployeeForm', () => {
     );
     const { user } = renderForm(onSubmit);
     await fillValidForm(user);
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
     await user.type(screen.getByRole('textbox', { name: 'Allowance 1 name' }), 'Bonus');
     await user.type(screen.getByRole('textbox', { name: 'Allowance 1 amount' }), '999999');
 
@@ -147,8 +147,8 @@ describe('EmployeeForm', () => {
 
   it('removing a row keeps later row errors on the right inputs', async () => {
     const { user } = renderForm();
-    await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
-    await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
+    await user.click(screen.getByRole('button', { name: 'Add deduction' }));
+    await user.click(screen.getByRole('button', { name: 'Add deduction' }));
     await user.type(screen.getByRole('textbox', { name: 'Deduction 1 name' }), 'Loan');
     await user.click(screen.getByRole('textbox', { name: 'Deduction 2 name' }));
     await user.tab();
@@ -162,14 +162,18 @@ describe('EmployeeForm', () => {
 
   it('flags the row just edited into a duplicate on blur, and clears both once fixed', async () => {
     const { user } = renderForm();
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
     const first = screen.getByRole('textbox', { name: 'Allowance 1 name' });
     await user.type(screen.getByRole('textbox', { name: 'Allowance 2 name' }), 'Housing');
     await user.type(first, 'housing');
     await user.tab();
 
+    // Both rows of the pair are flagged at once, as on submit.
     expect(first).toHaveAccessibleDescription('Name must be unique in this list.');
+    expect(screen.getByRole('textbox', { name: 'Allowance 2 name' })).toHaveAccessibleDescription(
+      'Name must be unique in this list.',
+    );
 
     await user.type(first, ' allowance');
     await user.tab();
@@ -178,12 +182,12 @@ describe('EmployeeForm', () => {
 
   it('removing a duplicate row clears the unique-name error it caused', async () => {
     const { user } = renderForm();
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
     await user.type(screen.getByRole('textbox', { name: 'Allowance 1 name' }), 'Housing');
     await user.type(screen.getByRole('textbox', { name: 'Allowance 2 name' }), 'housing');
     await user.tab();
-    expect(screen.getByText('Name must be unique in this list.')).toBeInTheDocument();
+    expect(screen.getAllByText('Name must be unique in this list.')).toHaveLength(2);
 
     await user.click(screen.getByRole('button', { name: 'Remove allowance 1' }));
 
@@ -192,19 +196,19 @@ describe('EmployeeForm', () => {
 
   it('moves focus to the next Remove button, then to the Add button, after removing rows', async () => {
     const { user } = renderForm();
-    await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
-    await user.click(screen.getByRole('button', { name: '+ Add deduction' }));
+    await user.click(screen.getByRole('button', { name: 'Add deduction' }));
+    await user.click(screen.getByRole('button', { name: 'Add deduction' }));
 
     await user.click(screen.getByRole('button', { name: 'Remove deduction 2' }));
     expect(screen.getByRole('button', { name: 'Remove deduction 1' })).toHaveFocus();
 
     await user.click(screen.getByRole('button', { name: 'Remove deduction 1' }));
-    expect(screen.getByRole('button', { name: '+ Add deduction' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Add deduction' })).toHaveFocus();
   });
 
   it('marks item names and amounts as required', async () => {
     const { user } = renderForm();
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
 
     expect(screen.getByRole('textbox', { name: 'Allowance 1 name' })).toBeRequired();
     expect(screen.getByRole('textbox', { name: 'Allowance 1 amount' })).toBeRequired();
@@ -215,7 +219,7 @@ describe('EmployeeForm', () => {
       <EmployeeForm initialValues={emptyFormValues()} submitLabel="Add employee" onSubmit={vi.fn()} today={TODAY} currency="USD" />,
     );
     const user = userEvent.setup();
-    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: 'Add allowance' }));
 
     for (const name of ['Base monthly salary', 'Allowance 1 amount']) {
       const input = screen.getByRole('textbox', { name });

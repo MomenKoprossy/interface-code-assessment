@@ -24,7 +24,9 @@ export function EmployeeFormPage() {
     navigate(listUrl, { state: { notice: `${saved.fullName} was ${id ? 'updated' : 'added'}.` } });
   }
 
-  const backLink = <Link to={listUrl}>← Back to employees</Link>;
+  const backLink = <Link to={listUrl}>
+      <span aria-hidden="true">←</span> Back to employees
+    </Link>;
 
   if (!id) {
     return (
