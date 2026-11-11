@@ -39,8 +39,8 @@ public class LoginTests
     }
 
     [Theory]
-    [InlineData("nobody@acme.test", Password)]      // unknown email
-    [InlineData("sara.ahmed@acme.test", "wrong")]    // wrong password
+    [InlineData("nobody@acme.test", Password)]
+    [InlineData("sara.ahmed@acme.test", "wrong")]
     public async Task Bad_credentials_return_the_same_generic_401(string email, string password)
     {
         var result = await Login(email, password);

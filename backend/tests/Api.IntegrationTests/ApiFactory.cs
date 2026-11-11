@@ -29,7 +29,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public static readonly DateTime StartedUtc = DateTime.UtcNow;
     public static DateOnly Today => DateOnly.FromDateTime(StartedUtc);
 
-    private const string JwtTestKey = "integration-tests-only-signing-key-0123456789abcdef0123456789ab"; // 64 chars
+    private const string JwtTestKey = "integration-tests-only-signing-key-0123456789abcdef0123456789ab";
 
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgres:17-alpine").Build();
     private readonly Dictionary<string, Task<LoginBody>> _logins = [];

@@ -97,7 +97,6 @@ public sealed class ConventionRulesTests
         offenders.Should().BeEmpty($"module cores take time from IClock so tests can pin it. Offending lines: {string.Join(", ", offenders)}");
     }
 
-    /// <summary>The backend folder: walk up from the test binaries until EmployeePayroll.slnx is found.</summary>
     private static string BackendRoot()
     {
         for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
