@@ -56,15 +56,21 @@ frontend/src/
   everything.
 - **List:** search (debounced 300 ms), department select (from `/api/employees/departments`), status select,
   pagination (prev/next + "page X of Y", page size 10). Query state lives in the URL search params, so it's
-  shareable and back-button friendly. Empty and loading states are handled.
+  shareable and back-button friendly. Empty and loading states are handled. Salaries show in the policy currency
+  (`GET /api/payroll/policy`). The result count is a live `status`.
 - **Form:** one component for create and edit. Allowance/deduction rows can be added and removed. Client-side validation
   runs on blur and on submit using `validation.ts`. Server 400/409 `errors` are mapped onto the same fields (camelCase
-  paths), and anything unmapped goes to a top-of-form `Alert`. The submit button is disabled while saving.
+  paths), and anything unmapped goes to a top-of-form `Alert`. The submit button is disabled while saving, and after a
+  failed submit focus moves to the first invalid field (the login page does the same). Money inputs show the currency
+  code as a decorative suffix. Values stay plain decimals.
 - **Delete:** a confirm dialog names the employee. On success the list refreshes; a 404 shows "already deleted".
 - **Payslip:** a `type="month"` picker (defaults to the current month) and a breakdown table (earnings, SI with cap
   note, tax per bracket, other deductions, net). A 422 shows the server's `detail` as a friendly notice, not an error.
+  A malformed `?month=` falls back to the current month, and the URL is corrected to match.
 - **Errors:** every API failure becomes an `ApiError` with `status`, `title`, `detail`, `fieldErrors`. A 401
-  clears the session and redirects to login. Network failures show "Can't reach the server".
+  clears the session and redirects to login. Network failures show "Can't reach the server". After a deliberate sign-out
+  the login page forgets the last page, so the next user lands on their own home. A deep link or an expired session still
+  returns to the page.
 
 ## Visual design ("simple design")
 

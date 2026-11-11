@@ -9,6 +9,13 @@ TypeScript frontend with hand-written SCSS, and PostgreSQL.
 It's built on my own **DotnetPlayGround** platform template, cut down to what this problem needs: a modular monolith on
 the template's building blocks, with service-grade module boundaries enforced by architecture tests.
 
+## Demo
+
+![Demo: HR signs in, searches and filters, adds an employee with live validation, opens the payslip (hand-checked), sees a 422 for a month before the hire date, deletes the employee; then an employee signs in and sees only their own payslip](docs/demo.gif)
+
+46 s, recorded with `playwright-cli` against the production Docker stack ([MP4](docs/demo.mp4)). The payslip shown is
+checked by hand in the captions: 9,000.00 − 825.00 SI − 985.00 tax − 300.00 loan = **6,890.00**.
+
 ---
 
 ## Run it
@@ -49,6 +56,12 @@ cd frontend && npm test
 
 CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of the above on every push, plus lint, typecheck and
 the production build. It then builds the Docker images, brings the compose stack up and checks it through nginx.
+
+**End to end in a real browser:** 8 user cycles (auth, list, create, edit, delete, payslip, employee role, responsive and
+accessibility) were driven through the compose stack with `playwright-cli` and repeated until clean: **5 runs, 751 steps,
+848 screenshots**. Each run's evidence was reviewed independently and every finding was adversarially verified before it
+was fixed. The final run passed 169/170 with no medium-or-higher findings, and its low-severity polish was fixed afterwards.
+Report and evidence: [`.claude/process/e2e/`](.claude/process/e2e/README.md).
 
 ---
 
@@ -112,8 +125,9 @@ payroll spec: [`.claude/docs/payroll-rules.md`](.claude/docs/payroll-rules.md) �
 
 ## AI usage
 
-Built with **Claude Code** (Claude Opus 5.5) acting as an orchestrator over **41 sub-agents** in 6 workflow runs:
-parallel module builds in isolated git worktrees, two review rounds with adversarial verification, and fix rounds.
+Built with **Claude Code** (Claude Opus 5.5) acting as an orchestrator over **173 sub-agents** in 12 workflow runs:
+parallel module builds in isolated git worktrees, two code-review rounds with adversarial verification, fix rounds, and five
+end-to-end browser runs (tester → reviewer → verifier per cycle).
 **The code, tests, configuration and docs were AI-generated.** The platform building blocks come from my own
 DotnetPlayGround template, which the AI vendored and modified. The architecture and scope decisions were mine (listed with
 my verbatim prompts). I reviewed, ran and verified everything, and every agent claim was re-checked by re-running the suites.
