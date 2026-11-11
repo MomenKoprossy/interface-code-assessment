@@ -63,7 +63,24 @@ export function EmployeeForm({
     if (errors[path]) setErrors((current) => withError(current, path, validateField(path, next, today)));
   }
 
-  const blur = (path: string) => setErrors((current) => withError(current, path, validateField(path, values, today)));
+  function blur(path: string) {
+    const list = /^(allowances|deductions)\[\d+\]\.name$/.exec(path)?.[1];
+    if (!list) {
+      setErrors((current) => withError(current, path, validateField(path, values, today)));
+      return;
+    }
+    // Item names are checked against each other: refresh this one and every other name error already on screen.
+    const fresh = validateEmployee(values, today);
+    setErrors((current) => {
+      const next = { ...current };
+      for (const key of new Set([path, ...Object.keys(current)])) {
+        if (!key.startsWith(`${list}[`) || !key.endsWith('.name')) continue;
+        if (fresh[key]) next[key] = fresh[key];
+        else delete next[key];
+      }
+      return next;
+    });
+  }
 
   const fieldProps = (name: SimpleField) => ({
     value: values[name],

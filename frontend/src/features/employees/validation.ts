@@ -82,13 +82,18 @@ export function validateStatus(value: string): string | undefined {
 function validateItems(list: PayItemList, items: PayItemDraft[]): FormErrors {
   const errors: FormErrors = {};
   if (items.length > LIMITS.itemsMax) errors[list] = `At most ${LIMITS.itemsMax} items are allowed.`;
-  const seen = new Set<string>();
+  // Every row of a duplicate pair is flagged, so the row the user just edited shows the error too.
+  const counts = new Map<string, number>();
+  for (const item of items) {
+    const key = item.name.trim().toLowerCase();
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
   items.forEach((item, index) => {
-    const name = item.name.trim();
     const nameError = requiredText(item.name, 'Name', LIMITS.itemNameMax);
     if (nameError) errors[`${list}[${index}].name`] = nameError;
-    else if (seen.has(name.toLowerCase())) errors[`${list}[${index}].name`] = 'Name must be unique in this list.';
-    seen.add(name.toLowerCase());
+    else if ((counts.get(item.name.trim().toLowerCase()) ?? 0) > 1) {
+      errors[`${list}[${index}].name`] = 'Name must be unique in this list.';
+    }
 
     const amountError = validateMoney(item.amount, 'Amount');
     if (amountError) errors[`${list}[${index}].amount`] = amountError;

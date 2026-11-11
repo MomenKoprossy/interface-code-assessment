@@ -1,6 +1,64 @@
 @use '../tokens' as *;
 @use '../mixins' as *;
 
+// Every row becomes a card, each cell labelled from data-label.
+@mixin table-cards {
+  border: 0;
+  background: transparent;
+
+  thead {
+    @include visually-hidden;
+  }
+
+  tbody,
+  tr,
+  td {
+    display: block;
+  }
+
+  tr {
+    @include card;
+    margin-bottom: $space-2;
+    padding: $space-2 0;
+  }
+
+  tbody tr:nth-child(even) {
+    background: $color-surface;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: $space-3;
+    padding: $space-1 $space-3;
+    text-align: right;
+
+    // Unlabelled cells (the name heading, the actions) are blocks rather than label/value pairs.
+    &:not([data-label]) {
+      display: block;
+      text-align: left;
+    }
+
+    &[data-label]::before {
+      content: attr(data-label);
+      font-size: $font-size-sm;
+      font-weight: 600;
+      color: $color-text-muted;
+      text-align: left;
+    }
+  }
+
+  .data-table__actions-cell {
+    padding-top: $space-2;
+  }
+
+  .data-table__actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
 .data-table {
   @include card;
   width: 100%;
@@ -88,60 +146,16 @@
     }
   }
 
-  // Narrow screens: every row becomes a card, each cell labelled from data-label.
+  // Narrow screens: rows become cards. The 4-column bracket table stays a table down to phone width.
   @include below($breakpoint-md) {
-    border: 0;
-    background: transparent;
-
-    thead {
-      @include visually-hidden;
+    &:not(.data-table--compact) {
+      @include table-cards;
     }
+  }
 
-    tbody,
-    tr,
-    td {
-      display: block;
-    }
-
-    tr {
-      @include card;
-      margin-bottom: $space-2;
-      padding: $space-2 0;
-    }
-
-    tbody tr:nth-child(even) {
-      background: $color-surface;
-    }
-
-    td {
-      display: flex;
-      justify-content: space-between;
-      gap: $space-3;
-      padding: $space-1 $space-3;
-      text-align: right;
-
-      // Unlabelled cells (the name heading, the actions) are blocks rather than label/value pairs.
-      &:not([data-label]) {
-        display: block;
-        text-align: left;
-      }
-
-      &[data-label]::before {
-        content: attr(data-label);
-        font-size: $font-size-sm;
-        font-weight: 600;
-        color: $color-text-muted;
-        text-align: left;
-      }
-    }
-
-    .data-table__actions-cell {
-      padding-top: $space-2;
-    }
-
-    .data-table__actions {
-      flex-wrap: wrap;
-      justify-content: flex-start;
+  @include below($breakpoint-sm) {
+    &.data-table--compact {
+      @include table-cards;
     }
   }
 }

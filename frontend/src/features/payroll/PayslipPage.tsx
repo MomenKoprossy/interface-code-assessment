@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { errorMessage, isStatus } from '../../api/problem';
 import { Alert } from '../../shared/components/Alert';
@@ -41,6 +41,11 @@ export function PayslipPage() {
     setSyncedMonth(month);
     setDraft(month);
   }
+
+  // A malformed ?month= falls back to the current month; make the URL say so too, so it can be shared as shown.
+  useEffect(() => {
+    if (params.has('month') && requested !== month) setParams({ month }, { replace: true, state: location.state });
+  }, [params, requested, month, setParams, location.state]);
 
   const changeMonth = (value: string) => {
     setDraft(value);
@@ -86,7 +91,7 @@ function PayslipError({ error, month }: { error: unknown; month: string }) {
   // 422 is an expected business outcome (inactive, not yet hired, deductions exceed gross), not a failure.
   if (isStatus(error, 422)) {
     return (
-      <Alert tone="info" title="No payslip for this month">
+      <Alert tone="info" title="No payslip available">
         {/* The server names the month as YYYY-MM; show it the way the rest of the page does. */}
         <p>{errorMessage(error).replace(month, formatMonth(month))}</p>
       </Alert>

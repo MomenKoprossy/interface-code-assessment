@@ -82,11 +82,19 @@ export function PayslipView({ payslip }: { payslip: Payslip }) {
                 {payslip.incomeTax.brackets.map((bracket) => (
                   <tr key={bracket.from}>
                     <td data-label="Bracket">
-                      {bracket.upTo === null
-                        ? `Over ${money(bracket.from)}`
-                        : bracket.from === 0
-                          ? `Up to ${money(bracket.upTo)}`
-                          : `Over ${money(bracket.from)} up to ${money(bracket.upTo)}`}
+                      {/* One element (a single flex item in the narrow card), wrapping only between its two halves. */}
+                      <span>
+                        {bracket.upTo === null ? (
+                          `Over ${money(bracket.from)}`
+                        ) : bracket.from === 0 ? (
+                          `Up to ${money(bracket.upTo)}`
+                        ) : (
+                          <>
+                            <span className="data-table__nowrap">Over {money(bracket.from)}</span>{' '}
+                            <span className="data-table__nowrap">up to {money(bracket.upTo)}</span>
+                          </>
+                        )}
+                      </span>
                     </td>
                     <td data-label="Rate" className="data-table__number">
                       {formatRate(bracket.rate)}

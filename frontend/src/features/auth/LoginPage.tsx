@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { errorMessage, isStatus } from '../../api/problem';
 import { Alert } from '../../shared/components/Alert';
@@ -6,6 +7,8 @@ import { Button } from '../../shared/components/Button';
 import { TextField } from '../../shared/components/TextField';
 import { validateEmail } from '../employees/validation';
 import { homePathFor, useAuth } from './AuthContext';
+
+type FieldErrors = { email?: string; password?: string };
 
 export function LoginPage() {
   const { user, login, sessionExpired } = useAuth();
@@ -16,7 +19,8 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const formRef = useRef<HTMLFormElement>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -28,9 +32,12 @@ export function LoginPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const invalid = { email: validateEmail(email), password: password ? undefined : 'Password is required.' };
-    setFieldErrors(invalid);
     setError(null);
-    if (invalid.email || invalid.password) return;
+    if (invalid.email || invalid.password) {
+      showFieldErrors(invalid);
+      return;
+    }
+    setFieldErrors({});
     setSubmitting(true);
     try {
       const signedIn = await login(email.trim(), password);
@@ -39,10 +46,19 @@ export function LoginPage() {
       const server = isStatus(caught, 400)
         ? { email: caught.fieldErrors.email?.[0], password: caught.fieldErrors.password?.[0] }
         : {};
-      setFieldErrors(server);
-      if (!server.email && !server.password) setError(errorMessage(caught));
       setSubmitting(false);
+      if (server.email || server.password) showFieldErrors(server);
+      else {
+        setFieldErrors({});
+        setError(errorMessage(caught));
+      }
     }
+  }
+
+  /** Same as the employee form: after a failed submit, focus moves to the first invalid field. */
+  function showFieldErrors(errors: FieldErrors) {
+    flushSync(() => setFieldErrors(errors));
+    formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
   }
 
   return (
@@ -52,7 +68,7 @@ export function LoginPage() {
         <p className="login__subtitle">Sign in to continue</p>
         {sessionExpired && !error && <Alert tone="info">Your session has expired. Please sign in again.</Alert>}
         {error && <Alert>{error}</Alert>}
-        <form onSubmit={handleSubmit} noValidate className="stack">
+        <form ref={formRef} onSubmit={handleSubmit} noValidate className="stack">
           <TextField
             label="Email"
             type="email"

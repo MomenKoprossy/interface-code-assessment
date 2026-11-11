@@ -5,7 +5,7 @@ import * as api from '../../api/payroll';
 import { ApiError } from '../../api/problem';
 import type { Payslip } from '../../api/types';
 import { currentMonth } from '../../shared/format';
-import { renderRoute, signInAs } from '../../test/render';
+import { currentLocation, renderRoute, signInAs } from '../../test/render';
 import { PayslipPage } from './PayslipPage';
 import { PayslipView } from './PayslipView';
 
@@ -152,7 +152,7 @@ describe('PayslipPage', () => {
 
     const detail = await screen.findByText('Employee was not yet hired in January 2019.');
     const notice = detail.closest('[role="status"]');
-    expect(notice).toHaveTextContent('No payslip for this month');
+    expect(notice).toHaveTextContent('No payslip available');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
@@ -200,6 +200,8 @@ describe('PayslipPage', () => {
     await screen.findByText('$9,875.00');
     expect(api.getPayslip).toHaveBeenLastCalledWith('emp-1', currentMonth(), expect.any(AbortSignal));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    // The URL is corrected to the month shown, so it can be shared as is.
+    await waitFor(() => expect(currentLocation()).toBe(`/employees/emp-1/payslip?month=${currentMonth()}`));
   });
 
   it('tells an employee without an employee record that there is nothing to show', () => {

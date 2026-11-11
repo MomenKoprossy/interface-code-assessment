@@ -160,6 +160,22 @@ describe('EmployeeForm', () => {
     expect(screen.queryByLabelText('Deduction 2 name')).not.toBeInTheDocument();
   });
 
+  it('flags the row just edited into a duplicate on blur, and clears both once fixed', async () => {
+    const { user } = renderForm();
+    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    await user.click(screen.getByRole('button', { name: '+ Add allowance' }));
+    const first = screen.getByRole('textbox', { name: 'Allowance 1 name' });
+    await user.type(screen.getByRole('textbox', { name: 'Allowance 2 name' }), 'Housing');
+    await user.type(first, 'housing');
+    await user.tab();
+
+    expect(first).toHaveAccessibleDescription('Name must be unique in this list.');
+
+    await user.type(first, ' allowance');
+    await user.tab();
+    expect(screen.queryByText('Name must be unique in this list.')).not.toBeInTheDocument();
+  });
+
   it('removing a duplicate row clears the unique-name error it caused', async () => {
     const { user } = renderForm();
     await user.click(screen.getByRole('button', { name: '+ Add allowance' }));

@@ -140,9 +140,15 @@ describe('allowances and deductions', () => {
     expect(tooLong['deductions[0].name']).toBe('Name must be at most 50 characters.');
   });
 
-  it('flags a case-insensitive duplicate name on the later row only', () => {
-    const errors = validateEmployee(validValues({ allowances: items(['Housing', '1'], [' housing ', '2']) }), TODAY);
-    expect(errors).toEqual({ 'allowances[1].name': 'Name must be unique in this list.' });
+  it('flags a case-insensitive duplicate name on every row that shares it', () => {
+    const errors = validateEmployee(
+      validValues({ allowances: items(['Housing', '1'], [' housing ', '2'], ['Transport', '3']) }),
+      TODAY,
+    );
+    expect(errors).toEqual({
+      'allowances[0].name': 'Name must be unique in this list.',
+      'allowances[1].name': 'Name must be unique in this list.',
+    });
   });
 
   it('allows the same name in allowances and deductions', () => {

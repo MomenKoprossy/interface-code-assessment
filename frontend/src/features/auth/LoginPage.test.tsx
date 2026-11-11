@@ -24,6 +24,7 @@ describe('LoginPage', () => {
 
     expect(fields().email).toHaveAccessibleDescription('Email is required.');
     expect(fields().password).toHaveAccessibleDescription('Password is required.');
+    expect(fields().email).toHaveFocus();
     expect(authApi.login).not.toHaveBeenCalled();
   });
 
@@ -44,6 +45,7 @@ describe('LoginPage', () => {
 
     expect(await screen.findByText('Password must be at most 128 characters.')).toBeInTheDocument();
     expect(fields().password).toHaveAttribute('aria-invalid', 'true');
+    expect(fields().password).toHaveFocus();
     expect(screen.queryByText('Validation failed')).not.toBeInTheDocument();
   });
 
