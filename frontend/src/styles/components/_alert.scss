@@ -27,6 +27,10 @@ $alert-tones: (
     font-weight: 700;
   }
 
+  &__body {
+    text-wrap: pretty;
+  }
+
   &__body > * + * {
     margin-top: $space-2;
   }

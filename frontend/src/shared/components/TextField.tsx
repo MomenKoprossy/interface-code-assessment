@@ -9,9 +9,11 @@ export interface TextFieldProps extends NativeInputProps {
   error?: string;
   /** A short unit shown inside the end of the input, e.g. the currency code. Decorative: the label carries the meaning. */
   suffix?: string;
+  /** Reserves the suffix slot even before the suffix is known, so the input isn't remounted (losing focus) when it arrives. */
+  affix?: boolean;
 }
 
-export function TextField({ label, value, onChange, error, suffix, className, ...input }: TextFieldProps) {
+export function TextField({ label, value, onChange, error, suffix, affix, className, ...input }: TextFieldProps) {
   const id = useId();
   const errorId = error ? `${id}-error` : undefined;
   const control = (
@@ -32,12 +34,14 @@ export function TextField({ label, value, onChange, error, suffix, className, ..
         {label}
         {input.required && <span aria-hidden="true"> *</span>}
       </label>
-      {suffix ? (
+      {affix || suffix ? (
         <div className="field__affix">
           {control}
-          <span className="field__suffix" aria-hidden="true">
-            {suffix}
-          </span>
+          {suffix && (
+            <span className="field__suffix" aria-hidden="true">
+              {suffix}
+            </span>
+          )}
         </div>
       ) : (
         control

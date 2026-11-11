@@ -75,19 +75,20 @@ export function PayslipPage() {
         </Alert>
       )}
       {payslip.loading && <Spinner label={`Loading payslip for ${formatMonth(month)}…`} />}
-      {payslip.error !== undefined && <PayslipError error={payslip.error} />}
+      {payslip.error !== undefined && <PayslipError error={payslip.error} month={month} />}
       {/* Never show the previous month's payslip while the next one loads. */}
       {payslip.data && !payslip.loading && <PayslipView payslip={payslip.data} />}
     </>
   );
 }
 
-function PayslipError({ error }: { error: unknown }) {
+function PayslipError({ error, month }: { error: unknown; month: string }) {
   // 422 is an expected business outcome (inactive, not yet hired, deductions exceed gross), not a failure.
   if (isStatus(error, 422)) {
     return (
       <Alert tone="info" title="No payslip for this month">
-        <p>{errorMessage(error)}</p>
+        {/* The server names the month as YYYY-MM; show it the way the rest of the page does. */}
+        <p>{errorMessage(error).replace(month, formatMonth(month))}</p>
       </Alert>
     );
   }

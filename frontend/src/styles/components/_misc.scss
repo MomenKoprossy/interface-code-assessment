@@ -10,10 +10,22 @@
   font-size: $font-size-sm;
   font-weight: 600;
   white-space: nowrap;
+  border: 1px solid transparent;
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+  }
 
   &--success {
     background: $color-success-soft;
     color: $color-success;
+
+    .badge__dot {
+      background: currentColor;
+    }
   }
 
   &--muted {

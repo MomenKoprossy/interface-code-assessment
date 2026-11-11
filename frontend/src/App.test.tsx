@@ -68,6 +68,25 @@ describe('route guards', () => {
     expect(sessionStorage.length).toBe(0);
   });
 
+  it("sends the next user to their own home after a sign-out, not to the previous user's last page", async () => {
+    const user = userEvent.setup();
+    signInAs('Employee', { employeeId: 'emp-1' });
+    renderApp(<App />, '/me/payslip?month=2019-02');
+    await user.click(screen.getByRole('button', { name: 'Sign out' }));
+    expect(currentLocation()).toBe('/login');
+
+    vi.mocked(authApi.login).mockResolvedValue({
+      accessToken: 't',
+      expiresAtUtc: '2999-01-01T00:00:00Z',
+      user: { id: 'u2', email: 'omar@example.com', displayName: 'Omar', role: 'Employee', employeeId: 'emp-2', permissions: [] },
+    });
+    await user.type(screen.getByLabelText(/email/i), 'omar@example.com');
+    await user.type(screen.getByLabelText(/password/i), 'secret');
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    await waitFor(() => expect(currentLocation()).toBe('/me/payslip'));
+  });
+
   it('returns to login when the server rejects the token', async () => {
     signInAs('HR');
     renderApp(<App />, '/employees');

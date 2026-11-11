@@ -150,7 +150,7 @@ describe('PayslipPage', () => {
     );
     renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=2019-01' });
 
-    const detail = await screen.findByText('Employee was not yet hired in 2019-01.');
+    const detail = await screen.findByText('Employee was not yet hired in January 2019.');
     const notice = detail.closest('[role="status"]');
     expect(notice).toHaveTextContent('No payslip for this month');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -169,13 +169,13 @@ describe('PayslipPage', () => {
       path: '/employees/:id/payslip',
       url: { pathname: '/employees/emp-1/payslip', search: '?month=2019-01', state: { from: '?page=2', name: 'Grace Hopper' } },
     });
-    await screen.findByText('Employee was not yet hired in 2019-01.');
+    await screen.findByText('Employee was not yet hired in January 2019.');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Payslip: Grace Hopper');
     expect(screen.getByRole('link', { name: '← Back to employees' })).toHaveAttribute('href', '/employees?page=2');
     unmountLinked();
 
     renderRoute(<PayslipPage />, { path: '/employees/:id/payslip', url: '/employees/emp-1/payslip?month=2019-01' });
-    await screen.findByText('Employee was not yet hired in 2019-01.');
+    await screen.findByText('Employee was not yet hired in January 2019.');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(/^Payslip$/);
   });
 
@@ -189,7 +189,7 @@ describe('PayslipPage', () => {
     );
     fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2019-01' } });
 
-    await screen.findByText('Employee was not yet hired in 2019-01.');
+    await screen.findByText('Employee was not yet hired in January 2019.');
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Payslip: Ada Lovelace');
   });
 

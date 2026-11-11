@@ -124,6 +124,7 @@ export function EmployeesListPage() {
           label="Search"
           type="search"
           placeholder="Name or email"
+          spellCheck={false}
           value={searchText}
           onChange={changeSearch}
           className="filters__search"
@@ -283,7 +284,7 @@ function EmployeeTable({ items, busy, currency, onDelete }: EmployeeTableProps) 
 function StatusBadge({ status }: { status: EmployeeListItem['status'] }) {
   return (
     <span className={`badge badge--${status === 'Active' ? 'success' : 'muted'}`}>
-      <span aria-hidden="true">{status === 'Active' ? '●' : '○'}</span> {status}
+      <span className="badge__dot" aria-hidden="true" /> {status}
     </span>
   );
 }

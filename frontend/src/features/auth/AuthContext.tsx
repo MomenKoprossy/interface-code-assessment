@@ -7,6 +7,8 @@ interface AuthContextValue {
   user: CurrentUser | null;
   /** True when the session ended because the server rejected the token (not a manual sign-out). */
   sessionExpired: boolean;
+  /** True after a manual sign-out, so the login page does not send the next user back to the last page. */
+  signedOut: boolean;
   login: (email: string, password: string) => Promise<CurrentUser>;
   logout: () => void;
 }
@@ -20,11 +22,13 @@ export function homePathFor(role: Role): string {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => loadSession());
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [signedOut, setSignedOut] = useState(false);
 
   useEffect(() => {
     const onExpired = () => {
       setSession(null);
       setSessionExpired(true);
+      setSignedOut(false);
     };
     window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
@@ -35,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveSession(response);
     setSession(response);
     setSessionExpired(false);
+    setSignedOut(false);
     return response.user;
   }, []);
 
@@ -42,11 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearSession();
     setSession(null);
     setSessionExpired(false);
+    setSignedOut(true);
   }, []);
 
   const value = useMemo(
-    () => ({ user: session?.user ?? null, sessionExpired, login, logout }),
-    [session, sessionExpired, login, logout],
+    () => ({ user: session?.user ?? null, sessionExpired, signedOut, login, logout }),
+    [session, sessionExpired, signedOut, login, logout],
   );
   return <AuthContext value={value}>{children}</AuthContext>;
 }

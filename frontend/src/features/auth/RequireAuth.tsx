@@ -4,9 +4,10 @@ import { homePathFor, useAuth } from './AuthContext';
 
 /** UX-only guards: they decide what to render. The server enforces every permission. */
 export function RequireAuth() {
-  const { user } = useAuth();
+  const { user, signedOut } = useAuth();
   const location = useLocation();
-  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+  // Remember the page for a deep link or an expired session, not after a deliberate sign-out (the next user is someone else).
+  if (!user) return <Navigate to="/login" replace state={signedOut ? undefined : { from: location.pathname + location.search }} />;
   return <Outlet />;
 }
 

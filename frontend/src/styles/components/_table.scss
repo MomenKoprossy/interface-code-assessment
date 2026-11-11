@@ -16,6 +16,14 @@
     vertical-align: middle;
   }
 
+  // A right-aligned number next to left-aligned text gets extra room, so the two don't read as one column.
+  @media (min-width: $breakpoint-md) {
+    th.data-table__number + th:not(.data-table__number),
+    td.data-table__number + td:not(.data-table__number) {
+      padding-left: $space-4;
+    }
+  }
+
   // Outer gutters line up with the cards above the table.
   th:first-child,
   td:first-child {
