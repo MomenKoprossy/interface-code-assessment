@@ -2,11 +2,6 @@ using Microsoft.Extensions.Options;
 
 namespace BuildingBlocks.Storage;
 
-/// <summary>
-/// Disk-backed <see cref="IFileStorage"/>. Files are stored under <c>RootPath</c> using a key of the
-/// form <c>yyyy/MM/{guid:N}/{fileName}</c>. <see cref="GetDownloadUrlAsync"/> returns
-/// <c>{PublicBaseUrl}/{storageKey}</c> (or the bare key when no base url is configured).
-/// </summary>
 internal sealed class LocalFileStorage(IOptions<FileStorageOptions> opt) : IFileStorage
 {
     private readonly LocalStorageOptions _options = opt.Value.Local;
@@ -51,10 +46,7 @@ internal sealed class LocalFileStorage(IOptions<FileStorageOptions> opt) : IFile
         return Task.CompletedTask;
     }
 
-    /// <summary>
-    /// Combines <paramref name="storageKey"/> with the configured root and verifies the resolved
-    /// absolute path stays inside the root — guards against path-traversal (e.g. <c>../../etc</c>).
-    /// </summary>
+    /// <summary>Rejects keys that resolve outside the storage root (path traversal, e.g. <c>../../etc</c>).</summary>
     private string ResolvePath(string storageKey)
     {
         var root = Path.GetFullPath(_options.RootPath);

@@ -1,5 +1,3 @@
-// Development orchestration (Aspire). `dotnet run --project backend/src/AppHost` starts a Postgres container,
-// the API and the Vite dev server, plus the Aspire dashboard (structured logs, traces, metrics).
 // Secrets are Aspire parameters: the JWT signing key is generated once and persisted in this project's user secrets;
 // the demo-user password is read from user secrets (Parameters:demo-password) or prompted by the dashboard.
 

@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    BuildingBlocks.Core = Abstractions + Domain + Application.
-    Zero infrastructure deps. Hand-rolled mediator pipeline (no Mediator NuGet).
-  -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks</RootNamespace>
     <Description>Right-sized core building block: Abstractions (Result/Error, paging, repository/clock/current-user), Domain (Entity, AggregateRoot, value objects, domain events), and a hand-rolled mediator (ISender + pipeline behaviors). Zero infrastructure dependencies.</Description>

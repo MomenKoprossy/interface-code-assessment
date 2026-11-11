@@ -5,11 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.UnitTests.Application;
 
-/// <summary>
-/// The hand-rolled mediator: routes a request to its single handler, wraps it in the pipeline with the
-/// FIRST-registered behavior outermost, and <see cref="ValidationBehavior{TRequest,TResponse}"/> short-circuits
-/// with every validator's failures before the handler runs.
-/// </summary>
 public class MediatorTests
 {
     public sealed record Ping(string Value) : IQuery<string>;

@@ -1,9 +1,6 @@
 namespace BuildingBlocks.Domain;
 
-/// <summary>
-/// In-process notification raised by an aggregate and dispatched on SaveChanges (after the audit
-/// interceptor runs). Concrete events are records: <c>record EmployeeDeactivated(...) : DomainEvent;</c>
-/// </summary>
+/// <summary>In-process notification, dispatched on SaveChanges after the audit interceptor runs.</summary>
 public abstract record DomainEvent
 {
     public Guid EventId { get; init; } = Guid.NewGuid();

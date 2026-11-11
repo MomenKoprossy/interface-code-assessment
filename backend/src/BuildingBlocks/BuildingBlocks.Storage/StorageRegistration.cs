@@ -6,11 +6,6 @@ using Microsoft.Extensions.Options;
 
 namespace BuildingBlocks.Storage;
 
-/// <summary>
-/// DI wiring for <see cref="IFileStorage"/>. Reads <c>Storage:Provider</c> and registers the
-/// Local or S3 provider (the latter also registers <see cref="IAmazonS3"/> pointed at
-/// <c>ServiceUrl</c>/<c>ForcePathStyle</c>).
-/// </summary>
 public static class StorageRegistration
 {
     public static IServiceCollection AddFileStorage(this IServiceCollection s, IConfiguration cfg)

@@ -11,11 +11,7 @@ namespace BuildingBlocks.UnitTests.Messaging;
 
 public sealed record SomethingHappened(Guid Id) : IIntegrationEvent;
 
-/// <summary>
-/// Transactional outbox over a real relational provider (SQLite in-memory): a publish is staged and only
-/// persists with the caller's SaveChanges; the dispatcher relays pending messages in order, keeps them pending
-/// when the transport fails (stopping the batch), and retires ones it can't deserialize.
-/// </summary>
+/// <summary>SQLite in-memory, so the outbox runs against a real relational provider.</summary>
 public sealed class OutboxTests : IAsyncLifetime
 {
     private sealed class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(options)

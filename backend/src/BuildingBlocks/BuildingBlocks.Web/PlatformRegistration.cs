@@ -7,17 +7,9 @@ using Microsoft.Extensions.Hosting;
 
 namespace BuildingBlocks.Web;
 
-/// <summary>
-/// The web-edge aggregation: <c>AddPlatform()</c> wires ProblemDetails, the global exception
-/// handler, the mediator pipeline, ambient identity/clock, HTTP logging, and the security baseline;
-/// <c>UsePlatform()</c> applies the middleware in the one correct order.
-/// </summary>
 public static class PlatformRegistration
 {
-    /// <summary>
-    /// Wires the always-on web edge. Generic over <see cref="IHostApplicationBuilder"/> so it works for
-    /// web services and the Aspire host alike.
-    /// </summary>
+    /// <summary>Generic over <see cref="IHostApplicationBuilder"/> so it works for web services and the Aspire host alike.</summary>
     public static TBuilder AddPlatform<TBuilder>(this TBuilder builder, Action<PlatformOptions>? configure = null)
         where TBuilder : IHostApplicationBuilder
     {
@@ -43,13 +35,10 @@ public static class PlatformRegistration
     }
 
     /// <summary>
-    /// Applies the platform middleware in order: exception handling → status-code pages → HTTP logging →
-    /// security headers → rate limiting → authentication → authorization.
-    /// Status-code pages turn every bodiless error (JwtBearer 401 challenge, authorization 403, binding 400/415,
-    /// rate-limit 429, unmatched 404) into RFC 7807 ProblemDetails, so clients get one error format everywhere.
-    /// NOTE on transport: the local compose demo serves plain HTTP (no TLS), so the API does not call
-    /// UseHttpsRedirection. In a real deployment TLS terminates at the edge (load balancer/ingress), and that edge
-    /// should send HSTS; this API adds HSTS only to requests it sees as HTTPS.
+    /// Order matters. Status-code pages turn every bodiless error (JwtBearer 401 challenge, authorization 403,
+    /// binding 400/415, rate-limit 429, unmatched 404) into ProblemDetails, so clients get one error format.
+    /// No UseHttpsRedirection: the compose demo serves plain HTTP, and in a real deployment TLS terminates at the
+    /// edge (load balancer/ingress), which should send HSTS; this API adds HSTS only to requests it sees as HTTPS.
     /// </summary>
     public static WebApplication UsePlatform(this WebApplication app)
     {

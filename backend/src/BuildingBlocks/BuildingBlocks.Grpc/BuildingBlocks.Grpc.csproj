@@ -1,10 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    BuildingBlocks.Grpc = gRPC server + typed-client wiring helpers:
-    AddGrpcClient<T> bound to a logical service-discovery name + standard resilience.
-    Opt-in: only for synchronous cross-service calls.
-  -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Grpc</RootNamespace>
     <Description>gRPC building block: AddPlatformGrpcServer plus typed-client wiring bound to a service-discovery logical name with standard resilience.</Description>

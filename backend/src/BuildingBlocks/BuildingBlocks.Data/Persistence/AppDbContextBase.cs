@@ -8,14 +8,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace BuildingBlocks.Data;
 
-/// <summary>
-/// Provider-agnostic EF Core base context. On <see cref="SaveChangesAsync(CancellationToken)"/> it
-/// stamps <see cref="IAuditable"/> entities, converts <see cref="ISoftDeletable"/> deletes to flag
-/// updates, collects domain events from <see cref="IHasDomainEvents"/> aggregates, saves, then
-/// dispatches the collected events. <see cref="OnModelCreating"/> applies a global soft-delete query
-/// filter to every <see cref="ISoftDeletable"/> entity type. The concrete DB provider (e.g. Npgsql)
-/// is selected by the consuming SERVICE, not here.
-/// </summary>
 /// <remarks>
 /// Derived contexts must apply their mappings (for example via <see cref="IModuleModelConfiguration"/>) BEFORE
 /// calling <c>base.OnModelCreating(modelBuilder)</c>: the soft-delete filters and domain-event ignores are applied
@@ -64,9 +56,8 @@ public abstract class AppDbContextBase : DbContext
         ApplySoftDeleteQueryFilters(modelBuilder);
     }
 
-    // Domain events are an in-memory concern dispatched on SaveChanges — never persisted. Ignore the
-    // base Entity<TId>.DomainEvents collection on every aggregate so EF doesn't try to map DomainEvent
-    // (which has no key). Done once here so no entity configuration has to repeat it.
+    // Domain events are never persisted, and EF can't map DomainEvent (no key). Ignoring them once here
+    // spares every entity configuration from repeating it.
     private static void IgnoreDomainEvents(ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes().ToList())

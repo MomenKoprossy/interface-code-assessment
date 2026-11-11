@@ -2,10 +2,6 @@ using System.Linq.Expressions;
 
 namespace BuildingBlocks.Abstractions;
 
-/// <summary>
-/// Generic repository over an aggregate. Keyed on the interface (not a concrete base) so any TId works.
-/// Implemented by EfRepository&lt;,&gt; in BuildingBlocks.Data.
-/// </summary>
 public interface IRepository<TEntity, in TId>
     where TEntity : class
 {
@@ -20,7 +16,7 @@ public interface IRepository<TEntity, in TId>
     IQueryable<TEntity> Query();
 }
 
-/// <summary>Commits the current unit of work; the SaveChanges call that stamps audit + dispatches domain events.</summary>
+/// <summary>Saving stamps audit fields and dispatches domain events.</summary>
 public interface IUnitOfWork
 {
     Task<int> SaveChangesAsync(CancellationToken ct = default);

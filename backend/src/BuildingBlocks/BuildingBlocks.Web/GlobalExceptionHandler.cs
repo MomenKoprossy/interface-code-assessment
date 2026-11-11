@@ -8,9 +8,8 @@ using Microsoft.Extensions.Logging;
 namespace BuildingBlocks.Web;
 
 /// <summary>
-/// Translates an exception the platform doesn't know about into ProblemDetails (e.g. a provider-specific
-/// unique-constraint violation → 409). Registered by the app; the first mapper that returns a value wins.
-/// Keeps exception translation in one place instead of try/catch blocks in handlers.
+/// Translates an exception the platform doesn't know about (e.g. a provider-specific unique-constraint
+/// violation → 409), so handlers need no try/catch. The first mapper that returns a value wins.
 /// </summary>
 public interface IExceptionProblemMapper
 {
@@ -18,10 +17,9 @@ public interface IExceptionProblemMapper
 }
 
 /// <summary>
-/// Converts unhandled exceptions into RFC 7807 ProblemDetails. A thrown
-/// <see cref="ValidationException"/> (from the mediator validation behavior) becomes 400 with per-field
-/// errors keyed by camelCase property path; registered <see cref="IExceptionProblemMapper"/>s get a chance
-/// next; everything else is a 500 that never leaks internals. The trace id is always attached.
+/// A <see cref="ValidationException"/> becomes 400 with per-field errors keyed by camelCase property path;
+/// registered <see cref="IExceptionProblemMapper"/>s get a chance next; everything else is a 500 that never
+/// leaks internals.
 /// </summary>
 internal sealed class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,

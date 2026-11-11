@@ -10,8 +10,6 @@ using OpenTelemetry.Trace;
 namespace Microsoft.Extensions.Hosting;
 
 /// <summary>
-/// Aspire service defaults: OpenTelemetry (structured logs, traces, metrics; OTLP export when
-/// <c>OTEL_EXPORTER_OTLP_ENDPOINT</c> is set) and health checks.
 /// No service discovery or HTTP resilience: the API makes no outgoing HTTP calls (BuildingBlocks.Grpc wires
 /// both for its clients).
 /// </summary>

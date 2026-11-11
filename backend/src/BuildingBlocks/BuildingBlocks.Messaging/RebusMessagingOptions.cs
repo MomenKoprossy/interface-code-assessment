@@ -3,17 +3,13 @@ using System.Reflection;
 namespace BuildingBlocks.Messaging;
 
 /// <summary>
-/// Options for <c>AddPlatformMessaging</c>. A publish-only service still needs a
-/// <see cref="QueueName"/> (the RabbitMQ transport requires an input queue even with no
-/// subscriptions). Add the assemblies that contain Rebus <c>IHandleMessages&lt;T&gt;</c>
-/// implementations to <see cref="HandlerAssemblies"/> so they are auto-discovered.
+/// A publish-only service still needs a <see cref="QueueName"/>: the RabbitMQ transport requires an input queue
+/// even with no subscriptions.
 /// </summary>
 public sealed class RebusMessagingOptions
 {
-    /// <summary>The Rebus input queue name for this service (e.g. "cms", "attachment").</summary>
     public string QueueName { get; set; } = "";
 
-    /// <summary>Assemblies scanned for Rebus <c>IHandleMessages&lt;T&gt;</c> handlers.</summary>
     public List<Assembly> HandlerAssemblies { get; } = [];
 
     /// <summary>

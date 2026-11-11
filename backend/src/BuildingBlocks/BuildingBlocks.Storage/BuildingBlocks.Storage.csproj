@@ -1,10 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!--
-    BuildingBlocks.Storage = IFileStorage with Local + S3-compatible providers, selected by
-    config. S3 provider works with AWS S3, MinIO, DO Spaces via ServiceUrl +
-    ForcePathStyle.
-  -->
   <PropertyGroup>
     <RootNamespace>BuildingBlocks.Storage</RootNamespace>
     <Description>File-storage building block: IFileStorage with Local and S3-compatible (AWS S3 / MinIO / DigitalOcean Spaces) providers selected by configuration.</Description>

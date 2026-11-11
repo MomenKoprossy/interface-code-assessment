@@ -4,9 +4,9 @@ namespace BuildingBlocks.Abstractions;
 public enum ErrorType { Failure, Validation, NotFound, Conflict, Forbidden, Unauthorized, Unprocessable }
 
 /// <summary>
-/// A railway-oriented error. Handlers return these instead of throwing for expected failures.
-/// <paramref name="Field"/> optionally names the input property the error is about (e.g. "email"), so the web
-/// layer can report it under ProblemDetails <c>errors</c> and a client can show it next to that field.
+/// Returned instead of throwing for expected failures. <paramref name="Field"/> optionally names the input
+/// property the error is about (e.g. "email"), so the web layer can report it under ProblemDetails <c>errors</c>
+/// and a client can show it next to that field.
 /// </summary>
 public readonly record struct Error(string Code, string Message, ErrorType Type, string? Field = null)
 {
@@ -21,7 +21,6 @@ public readonly record struct Error(string Code, string Message, ErrorType Type,
     public static Error Unprocessable(string msg)                   => new("unprocessable", msg, ErrorType.Unprocessable);
 }
 
-/// <summary>Result of an operation that can fail in an expected way (no exception thrown).</summary>
 public class Result
 {
     public bool IsSuccess { get; }
@@ -44,7 +43,6 @@ public class Result
     public static implicit operator Result(Error e) => Failure(e);
 }
 
-/// <summary>Result carrying a value on success.</summary>
 public sealed class Result<T> : Result
 {
     private readonly T _value;
@@ -55,9 +53,7 @@ public sealed class Result<T> : Result
 
     internal Result(T value, bool ok, Error? error) : base(ok, error) => _value = value;
 
-    /// <summary>Ergonomic success: <c>return dto;</c></summary>
     public static implicit operator Result<T>(T value) => Success(value);
 
-    /// <summary>Ergonomic failure: <c>return Error.NotFound("...");</c></summary>
     public static implicit operator Result<T>(Error e) => Failure<T>(e);
 }

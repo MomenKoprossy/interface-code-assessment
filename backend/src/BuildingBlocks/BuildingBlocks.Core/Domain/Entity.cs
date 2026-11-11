@@ -1,6 +1,5 @@
 namespace BuildingBlocks.Domain;
 
-/// <summary>Base entity: identity + a buffer of domain events to be dispatched on SaveChanges.</summary>
 public abstract class Entity<TId> : IHasDomainEvents
 {
     private readonly List<DomainEvent> _domainEvents = [];
@@ -22,5 +21,4 @@ public abstract class Entity<TId> : IHasDomainEvents
     public override int GetHashCode() => HashCode.Combine(GetType(), Id);
 }
 
-/// <summary>An aggregate root — the only entity type a repository is keyed on.</summary>
 public abstract class AggregateRoot<TId> : Entity<TId>;

@@ -16,19 +16,14 @@ public static class MessagingRegistration
     internal const string TransportKey = "BuildingBlocks.Messaging.Transport";
 
     /// <summary>
-    /// Wires Rebus integration-event messaging over RabbitMQ using the <c>rabbit</c> connection string
-    /// (Aspire provides it). When configured, registers the Rebus bus, auto-registers every Rebus
-    /// <c>IHandleMessages&lt;T&gt;</c> in <see cref="RebusMessagingOptions.HandlerAssemblies"/>, and maps
-    /// <see cref="IEventBus"/> to a Rebus-backed publisher. When <c>rabbit</c> is absent, registers a
-    /// no-op <see cref="IEventBus"/> so the service still boots in dev (Rebus is not registered).
-    /// With <see cref="RebusMessagingOptions.UseOutbox"/>, <see cref="IEventBus"/> instead stages events in the
-    /// service's DB (committed by its <c>SaveChangesAsync</c>) and a hosted dispatcher relays them to the transport.
+    /// Uses Rebus over RabbitMQ when a <c>rabbit</c> connection string exists; otherwise registers a no-op
+    /// <see cref="IEventBus"/> so the service still boots without a broker. With
+    /// <see cref="RebusMessagingOptions.UseOutbox"/>, <see cref="IEventBus"/> stages events in the service's DB and a
+    /// hosted dispatcher relays them to the transport.
     /// </summary>
     /// <remarks>
-    /// Distributed tracing: Rebus 8 emits the "Rebus" <c>ActivitySource</c> automatically, which
-    /// ServiceDefaults consumes via <c>AddSource("Rebus")</c>. The older opt-in
-    /// <c>Options(o =&gt; o.EnableDiagnosticSources())</c> hook does not exist in Rebus 8.9.2, so it is
-    /// intentionally not called here (see final report).
+    /// Rebus 8 emits the "Rebus" <c>ActivitySource</c> on its own; the older
+    /// <c>Options(o =&gt; o.EnableDiagnosticSources())</c> hook does not exist in Rebus 8.9.2, so it is not called.
     /// </remarks>
     public static TBuilder AddPlatformMessaging<TBuilder>(
         this TBuilder builder,
@@ -41,7 +36,7 @@ public static class MessagingRegistration
         var services = builder.Services;
         var rabbitConn = builder.Configuration.GetConnectionString("rabbit");
 
-        // Dev without a broker: no-op publisher so the service still boots. Do NOT register Rebus.
+        // No broker: Rebus must not be registered.
         if (string.IsNullOrWhiteSpace(rabbitConn))
         {
             services.TryAddKeyedSingleton<IEventBus, NoOpEventBus>(TransportKey);
@@ -61,7 +56,6 @@ public static class MessagingRegistration
                         await bus.Subscribe(eventType).ConfigureAwait(false);
                 });
 
-            // Discover IHandleMessages<T> implementations so subscribers are invoked.
             foreach (var assembly in options.HandlerAssemblies.Distinct())
                 services.AutoRegisterHandlersFromAssembly(assembly);
 
@@ -82,7 +76,6 @@ public static class MessagingRegistration
         return builder;
     }
 
-    /// <summary>Every <see cref="IIntegrationEvent"/> type handled by an <c>IHandleMessages&lt;T&gt;</c> in the assemblies.</summary>
     internal static Type[] FindSubscribedEventTypes(IEnumerable<Assembly> assemblies) =>
         assemblies.Distinct()
             .SelectMany(a => a.GetTypes())

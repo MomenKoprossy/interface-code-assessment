@@ -4,10 +4,6 @@ using Microsoft.AspNetCore.Http;
 
 namespace BuildingBlocks.Web;
 
-/// <summary>
-/// Ambient identity for the current request, read from the JWT claims on <see cref="IHttpContextAccessor"/>.
-/// Scoped — never static. Id from <c>sub</c>/<c>nameidentifier</c>, permissions from all <c>permission</c> claims.
-/// </summary>
 internal sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
     private ClaimsPrincipal? User => httpContextAccessor.HttpContext?.User;

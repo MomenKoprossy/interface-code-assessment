@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BuildingBlocks.UnitTests.Web;
 
-/// <summary>The named <see cref="SecurityRegistration.LoginRateLimitPolicy"/> limits attempts per client IP.</summary>
 public class LoginRateLimitTests
 {
     private static RequestDelegate Pipeline(Dictionary<string, string?> settings)

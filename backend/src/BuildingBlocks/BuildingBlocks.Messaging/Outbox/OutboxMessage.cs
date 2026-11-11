@@ -3,9 +3,8 @@ using Microsoft.EntityFrameworkCore;
 namespace BuildingBlocks.Messaging;
 
 /// <summary>
-/// An integration event persisted in the service's own DB, in the same <c>SaveChanges</c> transaction as
-/// the business change that raised it, then relayed to the transport by the outbox dispatcher. Pending
-/// while <see cref="ProcessedAtUtc"/> is null; <see cref="Error"/> holds the last failure for inspection.
+/// Saved in the same transaction as the business change that raised it. Pending while
+/// <see cref="ProcessedAtUtc"/> is null; <see cref="Error"/> holds the last failure for inspection.
 /// </summary>
 public sealed class OutboxMessage
 {
@@ -20,8 +19,8 @@ public sealed class OutboxMessage
 public static class OutboxModelBuilderExtensions
 {
     /// <summary>
-    /// Maps the <c>outbox_messages</c> table into the calling context's default schema. Call from
-    /// <c>OnModelCreating</c> of any service that sets <c>RebusMessagingOptions.UseOutbox</c>, then add a migration.
+    /// Maps into the calling context's default schema. Call from <c>OnModelCreating</c> of any service that sets
+    /// <c>RebusMessagingOptions.UseOutbox</c>, then add a migration.
     /// </summary>
     public static ModelBuilder AddPlatformOutbox(this ModelBuilder modelBuilder)
     {
