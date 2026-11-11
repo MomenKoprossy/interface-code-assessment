@@ -4,7 +4,7 @@
 
 A small HR application: employee CRUD with validation, search and pagination, plus a configurable monthly payroll
 calculator (progressive tax brackets, capped social insurance). It has an ASP.NET Core (.NET 10) API, a React +
-TypeScript frontend with hand-written SCSS, and PostgreSQL.
+TypeScript frontend with plain SCSS (no UI kit or CSS framework), and PostgreSQL.
 
 It's built on my own **DotnetPlayGround** platform template, cut down to what this problem needs: a modular monolith on
 the template's building blocks, with service-grade module boundaries enforced by architecture tests.
@@ -58,10 +58,9 @@ CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs all of the abov
 the production build. It then builds the Docker images, brings the compose stack up and checks it through nginx.
 
 **End to end in a real browser:** 8 user cycles (auth, list, create, edit, delete, payslip, employee role, responsive and
-accessibility) were driven through the compose stack with `playwright-cli` and repeated until clean: **5 runs, 751 steps,
-848 screenshots**. Each run's evidence was reviewed independently and every finding was adversarially verified before it
-was fixed. The final run passed 169/170 with no medium-or-higher findings, and its low-severity polish was fixed afterwards.
-Report and evidence: [`.claude/process/e2e/`](.claude/process/e2e/README.md).
+accessibility) were driven through the compose stack with `playwright-cli` and repeated until a run came back clean.
+Each finding was verified before it was fixed. The demo above was recorded the same way. These runs are not part of the
+automated suites.
 
 ---
 
@@ -125,14 +124,7 @@ payroll spec: [`.claude/docs/payroll-rules.md`](.claude/docs/payroll-rules.md) �
 
 ## AI usage
 
-Built with **Claude Code** (Claude Opus 5.5) acting as an orchestrator over **173 sub-agents** in 12 workflow runs:
-parallel module builds in isolated git worktrees, two code-review rounds with adversarial verification, fix rounds, and five
-end-to-end browser runs (tester → reviewer → verifier per cycle).
-**The code, tests, configuration and docs were AI-generated.** The platform building blocks come from my own
-DotnetPlayGround template, which the AI vendored and modified. The architecture and scope decisions were mine (listed with
-my verbatim prompts). I reviewed, ran and verified everything, and every agent claim was re-checked by re-running the suites.
-
-Everything is in [`ai-usage/`](ai-usage/README.md) → [`.claude/ai-usage/`](.claude/ai-usage/README.md): prompts,
-the orchestration scripts (every agent's brief), a blind assessment, every skill, plugin, MCP server and instruction file with its reason. The
-process record is in [`.claude/process/`](.claude/process/): the plan, a phase-by-phase log, the review log with every
-finding and verdict, and the test report.
+Built with **Claude Code** (Claude Opus 5.5) orchestrating sub-agents. **The code, tests, configuration and docs were
+AI-generated**, on top of my own DotnetPlayGround template. I chose to build on the template and set the scope. Claude
+proposed the modular-monolith cut and the frontend stack, and I accepted them. Who decided what, plus the agents, tools,
+plugins and instructions used, is in [`ai-usage/`](ai-usage/README.md).

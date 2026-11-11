@@ -45,7 +45,7 @@ template and are vendored here as readable source.
 **Why module cores are separate projects (not folders):** the compiler enforces purity. A module core
 cannot accidentally `using Microsoft.EntityFrameworkCore` because it has no reference to it. That is the
 brief's "business rules separate from the framework, the database and the HTTP layer", enforced by
-the build instead of by convention. (The template's CMS kept layers as folders; the review flagged that
+the build instead of by convention. (The template's CMS kept layers as folders, and
 its EF configuration sat in the `Domain` namespace. This build fixes that.)
 
 ## 3. Request flow
@@ -106,7 +106,7 @@ No try/catch in handlers or endpoints.
 
 ## 7. Frontend
 
-React 19 + TypeScript + Vite, hand-written SCSS, no UI kit. Feature folders (`features/employees`,
+React 19 + TypeScript + Vite, plain SCSS, no UI kit. Feature folders (`features/employees`,
 `features/payroll`, `features/auth`) hold hooks and pages. No business rules in components: validation rules,
 money formatting and API error mapping live in plain TS modules, which the tests cover. Details:
 [`frontend-design.md`](frontend-design.md).

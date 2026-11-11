@@ -1,6 +1,6 @@
 # Frontend design
 
-React 19 + TypeScript (strict) + Vite + **hand-written SCSS**. The goal is a simple, clean, accessible UI.
+React 19 + TypeScript (strict) + Vite + **plain SCSS** (no UI kit or CSS framework). The goal is a simple, clean, accessible UI.
 
 ## Dependencies (each justified, nothing else)
 

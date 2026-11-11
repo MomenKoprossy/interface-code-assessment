@@ -14,7 +14,7 @@
 | `BuildingBlocks.Messaging` | vendored, **not referenced by the app** | Rebus/RabbitMQ integration events + EF **transactional outbox**. Becomes relevant when a module is extracted and events must cross a process boundary reliably |
 | `BuildingBlocks.Grpc` | vendored, not referenced | Typed gRPC clients with service discovery + resilience. Becomes relevant when a `*.Contracts` interface is served remotely |
 | `BuildingBlocks.Storage` | vendored, not referenced | `IFileStorage` (local / S3 / MinIO). Becomes relevant for payslip PDFs or employee documents |
-| `BuildingBlocks.Caching` | vendored, not referenced | HybridCache via `AddPlatformCaching()` (L1 memory, Redis L2 when a `cache` connection string exists). Split out of `.Data` during review round 1 so the app graph carries no cache/Redis packages. Becomes relevant when read volume justifies it |
+| `BuildingBlocks.Caching` | vendored, not referenced | HybridCache via `AddPlatformCaching()` (L1 memory, Redis L2 when a `cache` connection string exists). Split out of `.Data` during code review so the app graph carries no cache/Redis packages. Becomes relevant when read volume justifies it |
 
 The unused blocks build and test in their own solution (`backend/src/BuildingBlocks/BuildingBlocks.slnx`, run in
 CI). They are **not** referenced by `EmployeePayroll.slnx`, so the running app contains no library it doesn't use

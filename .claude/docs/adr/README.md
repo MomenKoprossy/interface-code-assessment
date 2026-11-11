@@ -20,15 +20,15 @@ a module later is a mechanical change (see `scalability.md`) because the boundar
 ## ADR-002: Vendor the BuildingBlocks as source, wire only what's used
 
 **Context.** The template consumes `BuildingBlocks.*` as `.nupkg` files from an in-repo feed. Reviewers can't read
-binaries, and our error handling and architecture scores depend on that code. The user wants the scalability options to
-exist for future use, but the brief says every library must be justified.
+binaries, yet the error handling and the architecture rules live in that code. The growth-path blocks (messaging, gRPC,
+storage, caching) should stay available for later, but the brief says every library must be justified.
 
 **Decision.** All six blocks are copied as source under `backend/src/BuildingBlocks` with `ProjectReference`s. The app
-references Core, Data and Web. Messaging, Grpc, Storage and Caching (split out of Data in review round 1) build and test in
+references Core, Data and Web. Messaging, Grpc, Storage and Caching (split out of Data during code review) build and test in
 their own `BuildingBlocks.slnx` and are not part of the app's dependency graph. The packaging and local feed are removed.
 
 **Consequences.** Every line that runs is readable in the repo. The growth-path blocks are visible, compiled and tested,
-with zero runtime footprint. Changes to blocks done for this app (below) are recorded in `.claude/process/`.
+with zero runtime footprint. Changes to blocks done for this app are listed in `backend/src/BuildingBlocks/README.md` (the error-handling ones also in ADR-005 below).
 
 ## ADR-003: A module is split into Core / Contracts / Infrastructure projects
 
@@ -92,7 +92,7 @@ only from the environment, and the app fails at startup if it's missing or short
 **Consequences.** It meets the brief's bonus option 2. Refresh tokens and the BFF cookie pattern are documented as next
 steps (both already exist in the template).
 
-## ADR-009: React + Vite + hand-written SCSS, no UI kit
+## ADR-009: React + Vite + plain SCSS, no UI kit
 
 **Decision.** See `frontend-design.md`. The template's Blazor/MudBlazor dashboard is **not** used: the brief requires
 React/Angular/Vue with TypeScript and CSS/SCSS.

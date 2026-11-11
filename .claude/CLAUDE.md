@@ -13,7 +13,7 @@ Built on our **DotnetPlayGround** platform template (modular monolith variant). 
 ```
 backend/   EmployeePayroll.slnx · src/{Api, AppHost, ServiceDefaults, BuildingBlocks/*, Modules/{Employees,Payroll,Identity}/*} · tests/*
 frontend/  React + TS + Vite + SCSS
-.claude/   docs (design), process (how it was built: agents, reviews, test runs), ai-usage (transparency)
+.claude/   docs (design: architecture, API contract, payroll rules, ADRs)   ·   ai-usage/ (repo root): the AI disclosure
 ```
 
 ## Rules
